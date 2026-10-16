@@ -1,1190 +1,1593 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Moneta78</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-        :root {
-            --bg-dark: #1a1a2e;
-            --window-bg: #2c3e50;
-            --window-border: #1abc9c;
-            --window-title-bg: #2980b9;
-            --text-main: #ecf0f1;
-            --text-gold: #f1c40f;
-            --text-red: #e74c3c;
-            --btn-bg: #34495e;
-            --btn-hover: #4a6274;
-        }
-
-        * {
-            box-sizing: border-box;
-            user-select: none;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'Press Start 2P', cursive;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #main-menu {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-dark);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            transition: opacity 0.5s;
-        }
-
-        #main-menu h1 {
-            color: var(--text-gold);
-            font-size: 3rem;
-            text-shadow: 4px 4px 0 #d35400;
-            margin-bottom: 50px;
-        }
-
-        .menu-btn {
-            background: var(--window-border);
-            color: white;
-            border: 4px solid #16a085;
-            padding: 15px 30px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 1.2rem;
-            margin: 10px;
-            cursor: pointer;
-            transition: transform 0.1s, background 0.2s;
-        }
-
-        .menu-btn:hover {
-            background: #1abc9c;
-            transform: scale(1.05);
-        }
-
-        #game-ui {
-            display: none;
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-        }
-
-        header {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 800px;
-            background: rgba(44, 62, 80, 0.95);
-            border: 4px solid var(--window-border);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 20px;
-            z-index: 10;
-        }
-
-        .coin-display {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.5rem;
-            color: var(--text-gold);
-        }
-
-        .coin-icon {
-            width: 30px;
-            height: 30px;
-            background: radial-gradient(circle, #f1c40f 30%, #d35400 70%);
-            border-radius: 50%;
-            border: 2px solid #fff;
-            box-shadow: inset -2px -2px 0 rgba(0,0,0,0.3);
-        }
-
-        .goal-container {
-            flex-grow: 1;
-            margin: 0 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .goal-text {
-            font-size: 0.7rem;
-            color: #bdc3c7;
-            text-align: center;
-        }
-
-        .progress-bar-bg {
-            width: 100%;
-            height: 25px;
-            background: #8B5A2B;
-            border: 3px solid #5a3a1a;
-            border-radius: 5px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background: #f1c40f;
-            width: 0%;
-            transition: width 0.3s;
-        }
-
-        .progress-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 0.8rem;
-            color: #fff;
-            text-shadow: 1px 1px 2px #000;
-        }
-
-        #play-area {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: #8B5A2B;
-            background-image: 
-                repeating-linear-gradient(90deg, rgba(0,0,0,0.1) 0px, rgba(0,0,0,0.1) 2px, transparent 2px, transparent 40px),
-                repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 20px);
-            box-shadow: inset 0 0 150px rgba(0,0,0,0.8);
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .ui-window {
-            position: absolute;
-            top: 100px;
-            width: 280px;
-            background: rgba(44, 62, 80, 0.95);
-            border: 4px solid var(--window-border);
-            border-radius: 15px;
-            padding: 15px;
-            z-index: 10;
-            box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
-        }
-
-        #shop-window { left: 20px; }
-        #upgrades-window { right: 20px; }
-
-        .window-title {
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--window-title-bg);
-            padding: 8px 20px;
-            border-radius: 10px;
-            border: 3px solid var(--window-border);
-            font-size: 0.9rem;
-            white-space: nowrap;
-            color: #fff;
-            text-shadow: 1px 1px 0 #000;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 5px;
-            margin-top: 15px;
-            margin-bottom: 15px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            background: #1a252f;
-            color: #7f8c8d;
-            border: 2px solid #34495e;
-            border-radius: 5px;
-            padding: 8px;
-            font-family: inherit;
-            font-size: 0.6rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tab-btn.active {
-            background: var(--window-border);
-            color: #fff;
-            border-color: #16a085;
-        }
-
-        .tab-content {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .tab-content.hidden {
-            display: none;
-        }
-
-        .shop-item {
-            display: flex;
-            align-items: center;
-            background: #1a252f;
-            border: 2px solid #34495e;
-            border-radius: 8px;
-            padding: 10px;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.1s;
-        }
-
-        .shop-item:hover {
-            background: #2c3e50;
-            border-color: var(--text-gold);
-            transform: scale(1.02);
-        }
-
-        .shop-item.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-
-        .item-icon {
-            font-size: 1.5rem;
-            margin-right: 10px;
-        }
-
-        .item-info {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .item-name {
-            font-size: 0.7rem;
-            color: #ecf0f1;
-        }
-
-        .item-price {
-            font-size: 0.6rem;
-            color: var(--text-gold);
-        }
-
-        .upgrade-list {
-            margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .upgrade-item {
-            display: flex;
-            align-items: center;
-            background: #1a252f;
-            border: 2px solid #34495e;
-            border-radius: 8px;
-            padding: 10px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .upgrade-item:hover {
-            background: #2c3e50;
-            border-color: var(--window-border);
-        }
-
-        .upgrade-icon {
-            font-size: 1.8rem;
-            margin-right: 15px;
-            width: 40px;
-            text-align: center;
-        }
-
-        .upgrade-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .upgrade-name {
-            font-size: 0.7rem;
-            color: #ecf0f1;
-        }
-
-        .upgrade-price {
-            font-size: 0.6rem;
-            color: var(--text-red);
-        }
-
-        .upgrade-level {
-            font-size: 0.55rem;
-            color: #7f8c8d;
-        }
-
-        #game-content {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #phone {
-            position: absolute;
-            top: 150px;
-            right: 350px;
-            width: 100px;
-            height: 100px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            z-index: 5;
-        }
-
-        #phone:hover {
-            transform: scale(1.1);
-        }
-
-        .phone-body {
-            width: 70px;
-            height: 70px;
-            background: #2980b9;
-            border-radius: 15px;
-            position: absolute;
-            bottom: 0;
-            left: 15px;
-            border: 4px solid #1a252f;
-            box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
-        }
-
-        .phone-receiver {
-            width: 30px;
-            height: 70px;
-            background: #2980b9;
-            border-radius: 15px;
-            position: absolute;
-            top: 0;
-            left: 35px;
-            border: 4px solid #1a252f;
-            transform: rotate(15deg);
-            box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
-        }
-
-        .phone-dial {
-            width: 30px;
-            height: 30px;
-            background: #ecf0f1;
-            border-radius: 50%;
-            position: absolute;
-            bottom: 20px;
-            left: 35px;
-            border: 3px solid #1a252f;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.5rem;
-            color: #1a252f;
-        }
-
-        #table-items {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        .table-item {
-            position: absolute;
-            width: 80px;
-            height: 80px;
-            background: #ecf0f1;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            cursor: pointer;
-            pointer-events: auto;
-            transition: transform 0.2s, box-shadow 0.2s;
-            animation: dropIn 0.5s ease-out forwards;
-            font-size: 2rem;
-            border: 3px solid #fff;
-        }
-
-        .table-item.ticket {
-            border-radius: 10px;
-            width: 60px;
-            height: 100px;
-            background: #27ae60;
-            font-size: 1.5rem;
-        }
-
-        .table-item:hover {
-            transform: scale(1.1) translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.7);
-        }
-
-        @keyframes dropIn {
-            0% { transform: translateY(-200px) scale(0.5); opacity: 0; }
-            100% { transform: translateY(0) scale(1); opacity: 1; }
-        }
-
-        #focus-area {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            z-index: 20;
-            width: 380px;
-        }
-
-        #focus-item-container {
-            position: relative;
-            width: 300px;
-            height: 300px;
-            background: #ecf0f1;
-            border-radius: 50%;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.8);
-            overflow: hidden;
-            border: 5px solid #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #focus-item-container.ticket {
-            border-radius: 15px;
-            width: 240px;
-            height: 400px;
-            background: #ecf0f1;
-        }
-
-        /* Стили для символов билета (под краской) */
-        .ticket-symbols {
-            display: flex;
-            gap: 15px;
-            font-size: 3rem;
-            position: absolute;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        #focus-item-container canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            cursor: crosshair;
-            z-index: 1;
-        }
-
-        #info-panel {
-            width: 100%;
-            background: rgba(44, 62, 80, 0.95);
-            border: 4px solid var(--window-border);
-            border-radius: 10px;
-            padding: 15px;
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-            box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
-        }
-
-        .info-title {
-            font-size: 0.8rem;
-            color: #fff;
-            text-align: center;
-            margin-bottom: 5px;
-        }
-
-        .info-desc {
-            font-size: 0.6rem;
-            color: #bdc3c7;
-            line-height: 1.5;
-        }
-
-        .info-stats {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            margin-top: 10px;
-            font-size: 0.6rem;
-        }
-
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            color: var(--text-gold);
-        }
-
-        #clean-progress-bg {
-            width: 100%;
-            height: 20px;
-            background: #1a252f;
-            border: 3px solid #34495e;
-            border-radius: 5px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-
-        #clean-progress-fill {
-            width: 0%;
-            height: 100%;
-            background: #1abc9c;
-            transition: width 0.1s;
-        }
-
-        #collect-btn {
-            display: none;
-            background: #f1c40f;
-            color: #333;
-            border: 4px solid #d35400;
-            border-radius: 10px;
-            padding: 15px 40px;
-            font-family: 'Press Start 2P', cursive;
-            font-size: 1.2rem;
-            cursor: pointer;
-            box-shadow: 0 5px 0 #d35400;
-            transition: transform 0.1s, box-shadow 0.1s;
-            animation: pulse 1.5s infinite;
-        }
-
-        #collect-btn:active {
-            transform: translateY(5px);
-            box-shadow: 0 0 0 #d35400;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        #inventory-area {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 20px;
-            z-index: 5;
-        }
-
-        .inventory-slot {
-            width: 100px;
-            height: 100px;
-            background: rgba(0,0,0,0.5);
-            border: 3px dashed #7f8c8d;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.6rem;
-            text-align: center;
-            color: #bdc3c7;
-        }
-
-        .inventory-slot.active {
-            border-color: var(--window-border);
-            background: rgba(26, 188, 156, 0.2);
-            color: #fff;
-        }
-
-        #modal {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--window-bg);
-            padding: 30px;
-            border: 4px solid var(--window-border);
-            border-radius: 15px;
-            z-index: 50;
-            display: none;
-            flex-direction: column;
-            gap: 15px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-        }
-
-        .modal-btn {
-            background: var(--btn-bg);
-            color: white;
-            border: 2px solid #1a252f;
-            padding: 12px;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 0.7rem;
-            border-radius: 5px;
-            transition: background 0.2s;
-        }
-        
-        .modal-btn:hover { background: var(--btn-hover); }
-        .modal-btn.danger { background: var(--text-red); }
-        .modal-btn.danger:hover { background: #c0392b; }
-
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moneta78</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --window-bg: #2c3e50;
+    --window-border: #1abc9c;
+    --text-gold: #f1c40f;
+    --text-red: #e74c3c;
+}
+
+* { box-sizing: border-box; user-select: none; }
+
+body {
+    margin: 0; padding: 0;
+    background: #1a1a2e;
+    color: #ecf0f1;
+    font-family: 'Press Start 2P', cursive;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* === МЕНЮ === */
+#main-menu, #settings-menu {
+    position: absolute;
+    width: 100%; height: 100%;
+    background: #1a1a2e;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    padding: 30px;
+}
+#settings-menu { display: none; }
+
+h1.title {
+    color: var(--text-gold);
+    font-size: 3rem;
+    text-shadow: 4px 4px 0 #d35400;
+    margin-bottom: 50px;
+}
+
+.menu-btn {
+    background: #1abc9c;
+    color: white;
+    border: 4px solid #16a085;
+    padding: 18px 40px;
+    font-family: inherit;
+    font-size: 1.2rem;
+    margin: 10px;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.2s;
+    border-radius: 8px;
+}
+.menu-btn:hover { background: #2ecc71; transform: scale(1.05); }
+
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    font-size: 0.9rem;
+    margin: 20px 0;
+    color: #ecf0f1;
+    width: 100%;
+    max-width: 400px;
+}
+.toggle {
+    width: 60px; height: 30px;
+    background: #34495e;
+    border-radius: 15px;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+    flex-shrink: 0;
+}
+.toggle.on { background: #1abc9c; }
+.toggle::after {
+    content: '';
+    position: absolute;
+    width: 22px; height: 22px;
+    background: white;
+    border-radius: 50%;
+    top: 4px; left: 4px;
+    transition: left 0.3s;
+}
+.toggle.on::after { left: 34px; }
+
+.volume-slider {
+    -webkit-appearance: none;
+    width: 200px;
+    height: 10px;
+    background: #34495e;
+    border-radius: 5px;
+    outline: none;
+}
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    background: #1abc9c;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #fff;
+}
+.volume-slider::-moz-range-thumb {
+    width: 22px; height: 22px;
+    background: #1abc9c;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid #fff;
+}
+
+/* === ИГРА === */
+#game-ui {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+#play-area {
+    position: absolute;
+    inset: 0;
+    background-color: #8B5A2B;
+    background-image:
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 2px, transparent 2px, transparent 45px),
+        repeating-linear-gradient(0deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 22px),
+        radial-gradient(ellipse at center, rgba(255,200,120,0.1), transparent 70%);
+    box-shadow: inset 0 0 200px rgba(0,0,0,0.85);
+    z-index: 1;
+}
+
+/* === HUD === */
+header {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 950px;
+    background: rgba(44,62,80,0.95);
+    border: 4px solid var(--window-border);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 22px;
+    z-index: 10;
+}
+
+.coin-display {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.6rem; color: var(--text-gold);
+}
+.coin-icon {
+    width: 34px; height: 34px;
+    background: radial-gradient(circle at 30% 30%, #ffe680, #f1c40f 40%, #d35400 90%);
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.3), 0 0 10px rgba(241,196,15,0.5);
+}
+
+.goal-container { flex-grow: 1; margin: 0 25px; display: flex; flex-direction: column; gap: 5px; }
+.goal-text { font-size: 0.75rem; color: #bdc3c7; text-align: center; }
+.progress-bar-bg {
+    width: 100%; height: 26px;
+    background: #8B5A2B;
+    border: 3px solid #5a3a1a;
+    border-radius: 5px;
+    position: relative; overflow: hidden;
+}
+.progress-bar-fill { height: 100%; background: linear-gradient(180deg, #f1c40f, #e67e22); width: 0%; transition: width 0.3s; }
+.progress-text {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.85rem; color: #fff;
+    text-shadow: 2px 2px 0 #000, -1px -1px 0 #000;
+}
+
+.debt-display { font-size: 0.8rem; color: var(--text-red); }
+
+/* === ОКНА === */
+.ui-window {
+    position: absolute;
+    top: 110px;
+    width: 340px;
+    background: rgba(44,62,80,0.96);
+    border: 4px solid var(--window-border);
+    border-radius: 16px;
+    padding: 20px 18px;
+    z-index: 10;
+    box-shadow: 6px 6px 0 rgba(0,0,0,0.5);
+}
+#shop-window { left: 20px; }
+#upgrades-window { right: 20px; }
+
+.window-title {
+    position: absolute;
+    top: -22px; left: 50%;
+    transform: translateX(-50%);
+    background: #2980b9;
+    padding: 10px 25px;
+    border-radius: 10px;
+    border: 3px solid var(--window-border);
+    font-size: 0.95rem;
+    white-space: nowrap;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
+}
+
+.tabs { display: flex; gap: 6px; margin-top: 18px; margin-bottom: 18px; }
+.tab-btn {
+    flex: 1;
+    background: #1a252f;
+    color: #7f8c8d;
+    border: 2px solid #34495e;
+    border-radius: 6px;
+    padding: 10px;
+    font-family: inherit;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.tab-btn.active { background: var(--window-border); color: #fff; border-color: #16a085; }
+.tab-content { display: flex; flex-direction: column; gap: 10px; }
+.tab-content.hidden { display: none; }
+
+.shop-item {
+    display: flex; align-items: center;
+    background: linear-gradient(180deg, #223042, #1a252f);
+    border: 2px solid #34495e;
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.shop-item:hover { border-color: var(--text-gold); transform: translateX(3px); }
+.shop-item.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; filter: grayscale(0.7); }
+
+.item-icon { font-size: 1.9rem; margin-right: 14px; }
+.item-info { display: flex; flex-direction: column; gap: 4px; }
+.item-name { font-size: 0.75rem; color: #ecf0f1; }
+.item-price { font-size: 0.7rem; color: var(--text-gold); }
+.item-sub { font-size: 0.55rem; color: #7f8c8d; }
+
+.upgrade-list { margin-top: 18px; display: flex; flex-direction: column; gap: 12px; }
+.upgrade-item {
+    display: flex; align-items: center;
+    background: linear-gradient(180deg, #223042, #1a252f);
+    border: 2px solid #34495e;
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.upgrade-item:hover { border-color: var(--window-border); transform: translateX(-3px); }
+.upgrade-icon { font-size: 2rem; margin-right: 14px; width: 44px; text-align: center; }
+.upgrade-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.upgrade-name { font-size: 0.75rem; color: #ecf0f1; }
+.upgrade-price { font-size: 0.7rem; transition: color 0.2s; }
+.upgrade-price.affordable { color: #fff; }
+.upgrade-price.expensive { color: var(--text-red); }
+.upgrade-level { font-size: 0.6rem; color: #7f8c8d; }
+
+#game-content {
+    position: relative;
+    z-index: 2;
+    width: 100%; height: 100%;
+    display: flex; justify-content: center; align-items: center;
+}
+
+/* === ТЕЛЕФОН === */
+#phone {
+    position: absolute;
+    top: 160px; right: 380px;
+    width: 120px; height: 130px;
+    cursor: pointer;
+    transition: transform 0.2s;
+    z-index: 5;
+    filter: drop-shadow(4px 4px 6px rgba(0,0,0,0.6));
+}
+#phone:hover { transform: scale(1.08) rotate(-3deg); }
+
+.phone-base {
+    position: absolute;
+    bottom: 0; left: 5px;
+    width: 110px; height: 75px;
+    background: linear-gradient(180deg, #3498db, #1c5d8f);
+    border-radius: 12px 12px 18px 18px;
+    border: 4px solid #0d2033;
+    box-shadow: inset 0 -6px 0 rgba(0,0,0,0.3);
+}
+.phone-dial {
+    position: absolute;
+    bottom: 15px; left: 50%;
+    transform: translateX(-50%);
+    width: 40px; height: 40px;
+    background: radial-gradient(circle, #ecf0f1 40%, #95a5a6 90%);
+    border-radius: 50%;
+    border: 3px solid #0d2033;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 0.7rem; color: #2c3e50;
+}
+.phone-receiver {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%) rotate(-5deg);
+    width: 45px; height: 85px;
+    background: linear-gradient(180deg, #2980b9, #1c5d8f);
+    border-radius: 25px;
+    border: 4px solid #0d2033;
+    box-shadow: inset 4px 0 0 rgba(255,255,255,0.15);
+}
+
+/* === ПРЕДМЕТЫ === */
+#table-items { position: absolute; inset: 0; pointer-events: none; }
+
+.table-item {
+    position: absolute;
+    pointer-events: auto;
+    cursor: grab;
+    animation: dropIn 0.5s ease-out forwards;
+    transition: transform 0.15s;
+    filter: drop-shadow(3px 5px 4px rgba(0,0,0,0.6));
+}
+.table-item:hover { transform: translateY(-4px) scale(1.05); }
+.table-item:active { cursor: grabbing; }
+
+.table-item.plate {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffffff 0%, #f0f0f0 25%, #d5d5d5 60%, #a8a8a8 100%);
+    border: 3px solid #8a8a8a;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.15), inset -5px -5px 10px rgba(0,0,0,0.15);
+    display: flex; justify-content: center; align-items: center;
+}
+.table-item.plate::after {
+    content: '';
+    width: 55%; height: 55%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #ffffff, #e8e8e8 60%, #b8b8b8);
+    box-shadow: inset 2px 2px 6px rgba(0,0,0,0.1);
+}
+
+.table-item.ticket {
+    width: 130px; height: 75px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    border: 2px solid #b35d00;
+    box-shadow: inset 0 0 0 3px rgba(255,255,255,0.3);
+    position: relative;
+    overflow: hidden;
+}
+.table-item.ticket::before,
+.table-item.ticket::after {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    background: #8B5A2B;
+    border-radius: 50%;
+    top: 50%;
+}
+.table-item.ticket::before { left: -12px; transform: translateY(-50%); }
+.table-item.ticket::after { right: -12px; transform: translateY(-50%); }
+
+@keyframes dropIn {
+    0% { transform: translateY(-200px) scale(0.5) rotate(-15deg); opacity: 0; }
+    100% { transform: translateY(0) scale(1) rotate(0); opacity: 1; }
+}
+
+/* === ТЕМНЫЙ ФОН ПОД ФОКУСОМ === */
+#focus-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(3px);
+    z-index: 50;
+    display: none;
+    animation: fadeIn 0.2s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* === ФОКУС (чистка) === */
+#focus-area {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    z-index: 60; /* Выше магазина и улучшений */
+    width: 420px;
+}
+#focus-item-container {
+    position: relative;
+    width: 340px; height: 340px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid #fff;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.85);
+    background: radial-gradient(circle at 40% 35%, #fff, #e0e0e0 60%, #b8b8b8);
+    display: flex; justify-content: center; align-items: center;
+}
+#focus-item-container::after {
+    content: '';
+    position: absolute;
+    width: 55%; height: 55%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, #ffffff, #e8e8e8 60%, #b8b8b8);
+    pointer-events: none;
+    box-shadow: inset 2px 2px 8px rgba(0,0,0,0.08);
+}
+#focus-item-container.ticket {
+    width: 400px; height: 220px;
+    border-radius: 15px;
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+}
+#focus-item-container.ticket::after { display: none; }
+
+.ticket-symbols {
+    position: absolute;
+    display: flex;
+    gap: 25px;
+    font-size: 3rem;
+    z-index: 0;
+    pointer-events: none;
+    letter-spacing: 5px;
+}
+
+#focus-item-container canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    cursor: crosshair;
+    z-index: 1;
+}
+
+#info-panel {
+    width: 100%;
+    background: rgba(44,62,80,0.98);
+    border: 4px solid var(--window-border);
+    border-radius: 12px;
+    padding: 18px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+}
+.info-title { font-size: 0.85rem; color: #fff; text-align: center; margin-bottom: 5px; }
+.info-desc { font-size: 0.65rem; color: #bdc3c7; line-height: 1.6; }
+.info-stats { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; font-size: 0.65rem; }
+.stat-row { display: flex; justify-content: space-between; color: var(--text-gold); }
+
+#clean-progress-bg {
+    width: 100%; height: 22px;
+    background: #1a252f;
+    border: 3px solid #34495e;
+    border-radius: 5px;
+    margin-top: 12px;
+    overflow: hidden;
+}
+#clean-progress-fill {
+    width: 0%; height: 100%;
+    background: linear-gradient(90deg, #16a085, #1abc9c, #16a085);
+    transition: width 0.1s;
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+#collect-btn {
+    display: none;
+    background: linear-gradient(180deg, #ffdb4d, #f1c40f);
+    color: #333;
+    border: 4px solid #d35400;
+    border-radius: 12px;
+    padding: 16px 45px;
+    font-family: inherit;
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #d35400;
+    transition: transform 0.1s, box-shadow 0.1s;
+    animation: pulse 1.5s infinite;
+}
+#collect-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #d35400; }
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+}
+
+/* === МАШИНКА === */
+#machine-area {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    width: 180px; height: 180px;
+    background: linear-gradient(180deg, #4a5c6f, #2c3e50);
+    border: 5px solid #1abc9c;
+    border-radius: 15px;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 8;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 0 20px rgba(26,188,156,0.2);
+    transition: border-color 0.2s, transform 0.2s;
+}
+#machine-area.drag-over { border-color: #f1c40f; transform: scale(1.05); }
+.machine-label {
+    font-size: 0.65rem;
+    color: #1abc9c;
+    position: absolute;
+    top: -22px;
+    text-align: center;
+    width: 100%;
+}
+.machine-slot {
+    width: 120px; height: 70px;
+    background: rgba(0,0,0,0.4);
+    border: 3px dashed #1abc9c;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    color: #1abc9c;
+}
+.machine-progress {
+    width: 120px; height: 12px;
+    background: #1a252f;
+    border: 2px solid #1abc9c;
+    border-radius: 4px;
+    margin-top: 8px;
+    overflow: hidden;
+    display: none;
+}
+.machine-progress-fill {
+    width: 0%; height: 100%;
+    background: #1abc9c;
+    transition: width 0.3s linear;
+}
+
+#inventory-area {
+    position: absolute;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 18px;
+    z-index: 5;
+}
+.inventory-slot {
+    width: 100px; height: 100px;
+    background: rgba(0,0,0,0.5);
+    border: 3px dashed #7f8c8d;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.6rem;
+    text-align: center;
+    color: #bdc3c7;
+    padding: 5px;
+}
+.inventory-slot.active { border-color: #1abc9c; background: rgba(26,188,156,0.2); color: #fff; }
+
+#modal {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--window-bg);
+    padding: 35px;
+    border: 4px solid var(--window-border);
+    border-radius: 15px;
+    z-index: 70;
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+    min-width: 320px;
+}
+.modal-btn {
+    background: #34495e;
+    color: white;
+    border: 2px solid #1a252f;
+    padding: 14px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+.modal-btn:hover { background: #4a6274; }
+.modal-btn.danger { background: var(--text-red); }
+.modal-btn.danger:hover { background: #c0392b; }
+
+.float-reward {
+    position: absolute;
+    font-size: 1.5rem;
+    color: #f1c40f;
+    font-family: inherit;
+    pointer-events: none;
+    z-index: 100;
+    animation: floatUp 1.5s ease-out forwards;
+    text-shadow: 2px 2px 0 #000;
+}
+@keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-80px) scale(1.5); }
+}
+
+.save-indicator {
+    position: absolute;
+    bottom: 10px;
+    left: 15px;
+    font-size: 0.55rem;
+    color: #7f8c8d;
+    z-index: 15;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.save-indicator.show { opacity: 1; color: #1abc9c; }
+</style>
 </head>
 <body>
 
-    <div id="main-menu">
-        <h1>MONETA78</h1>
-        <button class="menu-btn" onclick="startGame()">ИГРАТЬ</button>
-        <button class="menu-btn" onclick="alert('Настройки в разработке!')">НАСТРОЙКИ</button>
+<div id="main-menu">
+    <h1 class="title">MONETA78</h1>
+    <button class="menu-btn" onclick="startGame()">▶ ИГРАТЬ</button>
+    <button class="menu-btn" onclick="openSettings()">⚙ НАСТРОЙКИ</button>
+    <button class="menu-btn" onclick="resetProgress()" style="background:#c0392b; border-color:#922b21; font-size:0.9rem;">🗑 СБРОСИТЬ</button>
+</div>
+
+<div id="settings-menu">
+    <h1 class="title">НАСТРОЙКИ</h1>
+    <div class="toggle-row">
+        <span>🎵 Музыка</span>
+        <div class="toggle on" id="music-toggle" onclick="toggleMusic()"></div>
     </div>
+    <div class="toggle-row">
+        <span>🎚 Громкость</span>
+        <input type="range" min="0" max="100" value="40" class="volume-slider" id="volume-slider" oninput="changeVolume(this.value)">
+    </div>
+    <div class="toggle-row">
+        <span>🔊 Звуки</span>
+        <div class="toggle on" id="sfx-toggle" onclick="toggleSfx()"></div>
+    </div>
+    <button class="menu-btn" onclick="closeSettings()" style="margin-top: 40px;">◀ НАЗАД</button>
+</div>
 
-    <div id="game-ui">
-        <div id="play-area"></div>
+<div id="game-ui">
+    <div id="play-area"></div>
 
-        <header>
-            <div class="coin-display">
-                <div class="coin-icon"></div>
-                <span id="coin-count">1</span>
+    <header>
+        <div class="coin-display">
+            <div class="coin-icon"></div>
+            <span id="coin-count">1</span>
+        </div>
+        <div class="goal-container">
+            <div class="goal-text">Цель: <span id="goal-target">50</span></div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+                <span class="progress-text" id="progress-text">1 / 50</span>
             </div>
-            
-            <div class="goal-container">
-                <div class="goal-text">Цель: <span id="goal-target">50</span></div>
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" id="progress-fill"></div>
-                    <span class="progress-text" id="progress-text">1 / 50</span>
+        </div>
+        <div class="debt-display">Долг: <span id="debt-count">0</span></div>
+    </header>
+
+    <div id="shop-window" class="ui-window">
+        <div class="window-title">🛒 Магазин</div>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('items')">Товары</button>
+            <button class="tab-btn" onclick="switchTab('gadgets')">Гаджеты</button>
+        </div>
+
+        <div id="tab-items" class="tab-content">
+            <div class="shop-item" id="btn-buy-plate" onclick="buyPlate()">
+                <div class="item-icon">🍽️</div>
+                <div class="item-info">
+                    <div class="item-name">Грязная тарелка</div>
+                    <div class="item-price">1 монета</div>
                 </div>
             </div>
 
-            <div style="font-size: 0.7rem; color: var(--text-red);">
-                Долг: <span id="debt-count">0</span>
-            </div>
-        </header>
-
-        <div id="shop-window" class="ui-window">
-            <div class="window-title">Магазин</div>
-            <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('items')">Товары</button>
-                <button class="tab-btn" onclick="switchTab('gadgets')">Гаджеты</button>
-            </div>
-            
-            <div id="tab-items" class="tab-content">
-                <div class="shop-item" id="btn-buy-plate" onclick="buyPlate()">
-                    <div class="item-icon">🍽️</div>
-                    <div class="item-info">
-                        <div class="item-name">Грязная тарелка</div>
-                        <div class="item-price">1 монета</div>
-                    </div>
-                </div>
-                
-                <div class="shop-item disabled" id="btn-buy-ticket" onclick="buyTicket()">
-                    <div class="item-icon">🎟️</div>
-                    <div class="item-info">
-                        <div class="item-name">Лотерейный билет</div>
-                        <div class="item-price">10 монет</div>
-                        <div style="font-size: 0.5rem; color: #e74c3c;" id="ticket-req">(Нужно 50 монет)</div>
-                    </div>
+            <div class="shop-item disabled" id="btn-buy-ticket-0" onclick="buyTicket(0)">
+                <div class="item-icon">🎟️</div>
+                <div class="item-info">
+                    <div class="item-name">Мелкий билет</div>
+                    <div class="item-price">15 монет</div>
+                    <div class="item-sub" id="ticket-req-0">Откроется на 50 монетах</div>
                 </div>
             </div>
 
-            <div id="tab-gadgets" class="tab-content hidden">
-                <div class="shop-item" id="btn-sticky-mat" onclick="buyUpgrade('stickyMat')">
-                    <div class="item-icon">🟦</div>
-                    <div class="item-info">
-                        <div class="item-name">Липкий коврик</div>
-                        <div class="item-price">50 монет</div>
-                    </div>
+            <div class="shop-item disabled" id="btn-buy-ticket-1" onclick="buyTicket(1)">
+                <div class="item-icon">🎫</div>
+                <div class="item-info">
+                    <div class="item-name">Средний билет</div>
+                    <div class="item-price">50 монет</div>
+                    <div class="item-sub" id="ticket-req-1">Откроется на 500 монетах</div>
                 </div>
-                <div class="shop-item" id="btn-trash-can" onclick="buyUpgrade('trashCan')">
-                    <div class="item-icon">🗑️</div>
-                    <div class="item-info">
-                        <div class="item-name">Мусорка</div>
-                        <div class="item-price">5 монет</div>
-                    </div>
+            </div>
+
+            <div class="shop-item disabled" id="btn-buy-ticket-2" onclick="buyTicket(2)">
+                <div class="item-icon">🏆</div>
+                <div class="item-info">
+                    <div class="item-name">Крупный билет</div>
+                    <div class="item-price">150 монет</div>
+                    <div class="item-sub" id="ticket-req-2">Откроется на 2000 монетах</div>
                 </div>
             </div>
         </div>
 
-        <div id="upgrades-window" class="ui-window">
-            <div class="window-title">Улучшения</div>
-            <div class="upgrade-list">
-                <div class="upgrade-item" onclick="buyUpgrade('luck')">
-                    <div class="upgrade-icon">🍀</div>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">Удача</div>
-                        <div class="upgrade-price">$ 200</div>
-                        <div class="upgrade-level" id="lvl-luck">Ур. 0</div>
-                    </div>
-                </div>
-                <div class="upgrade-item" onclick="buyUpgrade('scratchArea')">
-                    <div class="upgrade-icon">⛶</div>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">Площадь стёрки</div>
-                        <div class="upgrade-price">$ 25</div>
-                        <div class="upgrade-level" id="lvl-scratch">Ур. 0</div>
-                    </div>
-                </div>
-                <div class="upgrade-item" onclick="buyUpgrade('tinCoin')">
-                    <div class="upgrade-icon">🪙</div>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">Жестяная монета</div>
-                        <div class="upgrade-price">$ 1000</div>
-                        <div class="upgrade-level" id="lvl-coin">Мощность 1</div>
-                    </div>
+        <div id="tab-gadgets" class="tab-content hidden">
+            <div class="shop-item" id="btn-machine" onclick="buyMachine()">
+                <div class="item-icon">⚙️</div>
+                <div class="item-info">
+                    <div class="item-name">Машинка для билетов</div>
+                    <div class="item-price">500 монет</div>
+                    <div class="item-sub">Автоматически чистит билеты</div>
                 </div>
             </div>
-        </div>
-
-        <div id="game-content">
-            <div id="phone" onclick="openPhone()">
-                <div class="phone-body"></div>
-                <div class="phone-receiver"></div>
-                <div class="phone-dial">☎</div>
-            </div>
-
-            <div id="table-items"></div>
-
-            <div id="focus-area">
-                <div id="info-panel">
-                    <div class="info-title" id="info-title">Повседневная работа</div>
-                    <div class="info-desc" id="info-desc">Немного, но работа достойная.</div>
-                    <div class="info-stats" id="info-stats"></div>
-                    <div id="clean-progress-bg">
-                        <div id="clean-progress-fill"></div>
-                    </div>
+            <div class="shop-item" id="btn-sticky-mat" onclick="buyUpgrade('stickyMat')">
+                <div class="item-icon">🟦</div>
+                <div class="item-info">
+                    <div class="item-name">Липкий коврик</div>
+                    <div class="item-price">50 монет</div>
                 </div>
-                
-                <div id="focus-item-container">
-                    <!-- Сюда будет добавляться canvas и символы -->
-                </div>
-                
-                <button id="collect-btn" onclick="collectReward()">$ 0</button>
             </div>
-
-            <div id="inventory-area">
-                <div class="inventory-slot hidden" id="slot-sticky-mat">Липкий<br>коврик</div>
-                <div class="inventory-slot hidden" id="slot-trash-can">Мусорка</div>
+            <div class="shop-item" id="btn-trash-can" onclick="buyUpgrade('trashCan')">
+                <div class="item-icon">🗑️</div>
+                <div class="item-info">
+                    <div class="item-name">Мусорка</div>
+                    <div class="item-price">5 монет</div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="modal">
-        <h3 style="color: var(--text-gold); font-size: 1rem;">Телефон</h3>
-        <button class="modal-btn" onclick="takeLoan()">Взять кредит (+100 монет)</button>
-        <button class="modal-btn" onclick="getHint()">Подсказка (-5 монет)</button>
-        <button class="modal-btn danger" onclick="closePhone()">Закрыть</button>
+    <div id="upgrades-window" class="ui-window">
+        <div class="window-title">⚡ Улучшения</div>
+        <div class="upgrade-list">
+            <div class="upgrade-item" onclick="buyUpgrade('luck')">
+                <div class="upgrade-icon">🍀</div>
+                <div class="upgrade-info">
+                    <div class="upgrade-name">Удача</div>
+                    <div class="upgrade-price expensive" id="price-luck">$ 200</div>
+                    <div class="upgrade-level" id="lvl-luck">Ур. 0</div>
+                </div>
+            </div>
+            <div class="upgrade-item" onclick="buyUpgrade('scratchArea')">
+                <div class="upgrade-icon">⛶</div>
+                <div class="upgrade-info">
+                    <div class="upgrade-name">Площадь стёрки</div>
+                    <div class="upgrade-price expensive" id="price-scratch">$ 25</div>
+                    <div class="upgrade-level" id="lvl-scratch">Ур. 0</div>
+                </div>
+            </div>
+            <div class="upgrade-item" onclick="buyUpgrade('tinCoin')">
+                <div class="upgrade-icon">🪙</div>
+                <div class="upgrade-info">
+                    <div class="upgrade-name">Жестяная монета</div>
+                    <div class="upgrade-price expensive" id="price-tinCoin">$ 1000</div>
+                    <div class="upgrade-level" id="lvl-coin">Мощность 1</div>
+                </div>
+            </div>
+            <div class="upgrade-item" id="upgrade-machineSpeed" onclick="buyUpgrade('machineSpeed')" style="display:none;">
+                <div class="upgrade-icon">⚡</div>
+                <div class="upgrade-info">
+                    <div class="upgrade-name">Скорость машинки</div>
+                    <div class="upgrade-price expensive" id="price-machineSpeed">$ 150</div>
+                    <div class="upgrade-level" id="lvl-machine">Ур. 0</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script>
-        const state = {
-            coins: 1,
-            debt: 0,
-            platesWashed: 0,
-            ticketsUnlocked: false, // Билеты разблокируются после 50 монет
-            hasStickyMat: false,
-            hasTrashCan: false,
-            activeItem: null,
-            isScratching: false,
-            currentTicketWin: 0, // Выигрыш текущего билета
-            currentTicketResult: [], // Символы текущего билета
-            levels: { luck: 0, scratchArea: 0, tinCoin: 0 },
-            prices: { luck: 200, scratchArea: 25, tinCoin: 1000 },
-            goal: 50,
-            nextGoal: 2000
+    <div id="game-content">
+        <div id="phone" onclick="openPhone()">
+            <div class="phone-base"></div>
+            <div class="phone-receiver"></div>
+            <div class="phone-dial">☎</div>
+        </div>
+
+        <div id="table-items"></div>
+
+        <div id="machine-area">
+            <div class="machine-label">МАШИНКА</div>
+            <div class="machine-slot" id="machine-slot">⌛</div>
+            <div class="machine-progress" id="machine-progress">
+                <div class="machine-progress-fill" id="machine-progress-fill"></div>
+            </div>
+        </div>
+
+        <div id="inventory-area">
+            <div class="inventory-slot hidden" id="slot-sticky-mat" style="display:none;">Липкий<br>коврик</div>
+            <div class="inventory-slot hidden" id="slot-trash-can" style="display:none;">Мусорка</div>
+        </div>
+    </div>
+
+    <div class="save-indicator" id="save-indicator">💾 Сохранено</div>
+</div>
+
+<!-- ТЕМНЫЙ ФОН ПОД ФОКУСОМ -->
+<div id="focus-backdrop"></div>
+
+<!-- ФОКУС ВНЕ #game-content, чтобы быть поверх всего -->
+<div id="focus-area">
+    <div id="info-panel">
+        <div class="info-title" id="info-title">Повседневная работа</div>
+        <div class="info-desc" id="info-desc">Помой тарелку, чтобы получить монеты.</div>
+        <div class="info-stats" id="info-stats"></div>
+        <div id="clean-progress-bg">
+            <div id="clean-progress-fill"></div>
+        </div>
+    </div>
+    <div id="focus-item-container"></div>
+    <button id="collect-btn" onclick="collectReward()">$ 0</button>
+</div>
+
+<div id="modal">
+    <h3 style="color: var(--text-gold); font-size: 1rem;">☎ Телефон</h3>
+    <button class="modal-btn" onclick="takeLoan()">Взять кредит (+100 монет)</button>
+    <button class="modal-btn" onclick="getHint()">Подсказка (-5 монет)</button>
+    <button class="modal-btn danger" onclick="closePhone()">Закрыть</button>
+</div>
+
+<script>
+// ============ СОСТОЯНИЕ ============
+const defaultState = {
+    coins: 1,
+    debt: 0,
+    platesWashed: 0,
+    hasStickyMat: false,
+    hasTrashCan: false,
+    hasMachine: false,
+    activeItem: null,
+    isScratching: false,
+    currentTicketTier: 0,
+    currentTicketWin: 0,
+    currentTicketSymbols: [],
+    musicOn: true,
+    sfxOn: true,
+    musicVolume: 0.4,
+    levels: { luck: 0, scratchArea: 0, tinCoin: 0, machineSpeed: 0 },
+    prices: { luck: 200, scratchArea: 25, tinCoin: 1000, machineSpeed: 150 },
+    goal: 50,
+    ticketTiers: [
+        { name: 'Мелкий', cost: 15, unlockGoal: 50, symbols: ['🔥','💵','💰'], minReward: 5, maxReward: 20 },
+        { name: 'Средний', cost: 50, unlockGoal: 500, symbols: ['⭐','💎','🎰'], minReward: 25, maxReward: 100 },
+        { name: 'Крупный', cost: 150, unlockGoal: 2000, symbols: ['👑','💍','🏆'], minReward: 80, maxReward: 400 },
+    ]
+};
+
+let state = JSON.parse(JSON.stringify(defaultState));
+
+// ============ СОХРАНЕНИЕ ============
+const SAVE_KEY = 'moneta78_save';
+
+function saveGame() {
+    try {
+        const saveData = {
+            coins: state.coins,
+            debt: state.debt,
+            platesWashed: state.platesWashed,
+            hasStickyMat: state.hasStickyMat,
+            hasTrashCan: state.hasTrashCan,
+            hasMachine: state.hasMachine,
+            musicOn: state.musicOn,
+            sfxOn: state.sfxOn,
+            musicVolume: state.musicVolume,
+            levels: state.levels,
+            prices: state.prices,
+            goal: state.goal
+        };
+        localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+        showSaveIndicator();
+    } catch(e) { console.warn('Save failed', e); }
+}
+
+function loadGame() {
+    try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return false;
+        const data = JSON.parse(raw);
+        Object.assign(state, data);
+        return true;
+    } catch(e) { return false; }
+}
+
+function resetProgress() {
+    if (!confirm('Удалить весь прогресс? Это необратимо!')) return;
+    localStorage.removeItem(SAVE_KEY);
+    state = JSON.parse(JSON.stringify(defaultState));
+    location.reload();
+}
+
+let saveTimeout;
+function showSaveIndicator() {
+    const el = document.getElementById('save-indicator');
+    el.classList.add('show');
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(() => el.classList.remove('show'), 1000);
+}
+
+setInterval(() => {
+    if (document.getElementById('game-ui').style.display === 'block') {
+        saveGame();
+    }
+}, 3000);
+
+window.addEventListener('beforeunload', saveGame);
+
+// ============ МУЗЫКА ============
+let audioCtx = null;
+let musicLoop = null;
+
+function initAudio() {
+    if (!audioCtx) {
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        catch(e) { console.warn('Audio not supported'); }
+    }
+}
+
+function playTone(freq, duration = 3, volume = 0.04) {
+    if (!audioCtx || !state.musicOn) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const vol = volume * state.musicVolume;
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(vol, audioCtx.currentTime + 0.8);
+    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration + 0.1);
+}
+
+function startMusicLoop() {
+    if (musicLoop) return;
+    const notes = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33];
+    musicLoop = setInterval(() => {
+        if (!state.musicOn || !audioCtx) return;
+        playTone(notes[Math.floor(Math.random() * notes.length)], 4, 0.035);
+        if (Math.random() > 0.6) {
+            setTimeout(() => playTone(notes[Math.floor(Math.random() * notes.length)], 3, 0.025), 500);
+        }
+    }, 1800);
+}
+
+function playSfx(freq, duration = 0.1, volume = 0.15) {
+    if (!state.sfxOn || !audioCtx) return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.value = freq;
+    const vol = volume * state.musicVolume;
+    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+}
+
+function toggleMusic() {
+    state.musicOn = !state.musicOn;
+    document.getElementById('music-toggle').classList.toggle('on', state.musicOn);
+    if (state.musicOn) { initAudio(); startMusicLoop(); }
+    saveGame();
+}
+function toggleSfx() {
+    state.sfxOn = !state.sfxOn;
+    document.getElementById('sfx-toggle').classList.toggle('on', state.sfxOn);
+    saveGame();
+}
+function changeVolume(val) {
+    state.musicVolume = val / 100;
+    saveGame();
+}
+
+// ============ МЕНЮ ============
+function openSettings() {
+    document.getElementById('main-menu').style.display = 'none';
+    document.getElementById('settings-menu').style.display = 'flex';
+    document.getElementById('volume-slider').value = Math.round(state.musicVolume * 100);
+    document.getElementById('music-toggle').classList.toggle('on', state.musicOn);
+    document.getElementById('sfx-toggle').classList.toggle('on', state.sfxOn);
+}
+function closeSettings() {
+    document.getElementById('main-menu').style.display = 'flex';
+    document.getElementById('settings-menu').style.display = 'none';
+}
+
+function startGame() {
+    initAudio();
+    startMusicLoop();
+    document.getElementById('main-menu').style.opacity = '0';
+    setTimeout(() => {
+        document.getElementById('main-menu').style.display = 'none';
+        document.getElementById('game-ui').style.display = 'block';
+        applyLoadedState();
+        updateUI();
+    }, 500);
+}
+
+function applyLoadedState() {
+    if (state.hasMachine) {
+        document.getElementById('machine-area').style.display = 'flex';
+        document.getElementById('btn-machine').classList.add('disabled');
+        document.getElementById('btn-machine').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Машинка куплена</div></div>';
+        document.getElementById('upgrade-machineSpeed').style.display = 'flex';
+    }
+    if (state.hasStickyMat) {
+        document.getElementById('slot-sticky-mat').style.display = 'flex';
+        document.getElementById('slot-sticky-mat').classList.add('active');
+        document.getElementById('btn-sticky-mat').classList.add('disabled');
+        document.getElementById('btn-sticky-mat').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Куплено</div></div>';
+    }
+    if (state.hasTrashCan) {
+        document.getElementById('slot-trash-can').style.display = 'flex';
+        document.getElementById('slot-trash-can').classList.add('active');
+        document.getElementById('btn-trash-can').classList.add('disabled');
+        document.getElementById('btn-trash-can').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Куплено</div></div>';
+    }
+}
+
+// ============ UI ============
+function updateUI() {
+    document.getElementById('coin-count').innerText = state.coins;
+    document.getElementById('debt-count').innerText = state.debt;
+
+    let progressPercent = Math.min((state.coins / state.goal) * 100, 100);
+    document.getElementById('progress-fill').style.width = progressPercent + '%';
+    document.getElementById('progress-text').innerText = `${state.coins} / ${state.goal}`;
+    document.getElementById('goal-target').innerText = state.goal;
+
+    if (state.coins >= state.goal) {
+        state.goal = state.goal * 4;
+        playSfx(880, 0.3, 0.2);
+        setTimeout(() => playSfx(1200, 0.3, 0.2), 150);
+    }
+
+    state.ticketTiers.forEach((tier, i) => {
+        const btn = document.getElementById('btn-buy-ticket-' + i);
+        const req = document.getElementById('ticket-req-' + i);
+        if (state.coins >= tier.unlockGoal * 0.9) {
+            btn.classList.remove('disabled');
+            if (req) req.style.display = 'none';
+        } else {
+            btn.classList.add('disabled');
+            if (req) req.style.display = 'block';
+        }
+    });
+
+    updatePriceColor('price-luck', state.prices.luck);
+    updatePriceColor('price-scratch', state.prices.scratchArea);
+    updatePriceColor('price-tinCoin', state.prices.tinCoin);
+    updatePriceColor('price-machineSpeed', state.prices.machineSpeed);
+
+    document.getElementById('price-luck').innerText = '$ ' + state.prices.luck;
+    document.getElementById('price-scratch').innerText = '$ ' + state.prices.scratchArea;
+    document.getElementById('price-tinCoin').innerText = '$ ' + state.prices.tinCoin;
+    document.getElementById('price-machineSpeed').innerText = '$ ' + state.prices.machineSpeed;
+
+    document.getElementById('lvl-luck').innerText = `Ур. ${state.levels.luck}`;
+    document.getElementById('lvl-scratch').innerText = `Ур. ${state.levels.scratchArea}`;
+    document.getElementById('lvl-coin').innerText = `Мощность ${state.levels.tinCoin + 1}`;
+    document.getElementById('lvl-machine').innerText = `Ур. ${state.levels.machineSpeed}`;
+}
+
+function updatePriceColor(id, price) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (state.coins >= price) {
+        el.classList.remove('expensive');
+        el.classList.add('affordable');
+    } else {
+        el.classList.remove('affordable');
+        el.classList.add('expensive');
+    }
+}
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+    if (tab === 'items') {
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        document.getElementById('tab-items').classList.remove('hidden');
+    } else {
+        document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        document.getElementById('tab-gadgets').classList.remove('hidden');
+    }
+}
+
+// ============ ПОКУПКИ ============
+function buyPlate() {
+    if (state.coins < 1) return showMsg('Мало монет!');
+    if (state.activeItem) return showMsg('Сначала закончи с текущим!');
+    state.coins -= 1;
+    playSfx(440, 0.1, 0.1);
+    updateUI();
+    spawnTableItem('plate');
+}
+
+function buyTicket(tier) {
+    const t = state.ticketTiers[tier];
+    if (state.coins < t.cost) return showMsg('Мало монет!');
+    if (state.activeItem) return showMsg('Сначала закончи с текущим!');
+
+    state.coins -= t.cost;
+    state.currentTicketTier = tier;
+    playSfx(550, 0.1, 0.1);
+    updateUI();
+    spawnTableItem('ticket');
+}
+
+function spawnTableItem(type) {
+    const container = document.getElementById('table-items');
+    const item = document.createElement('div');
+    item.className = `table-item ${type}`;
+    item.dataset.type = type;
+
+    const maxX = window.innerWidth - 500;
+    const maxY = window.innerHeight - 250;
+    const x = 380 + Math.random() * Math.max(100, maxX - 380);
+    const y = 130 + Math.random() * Math.max(100, maxY - 130);
+
+    item.style.left = `${x}px`;
+    item.style.top = `${y}px`;
+
+    let dragged = false;
+    let startX, startY, offsetX, offsetY;
+
+    item.onmousedown = (e) => {
+        if (state.activeItem) return;
+        dragged = false;
+        startX = e.clientX;
+        startY = e.clientY;
+        const rect = item.getBoundingClientRect();
+        offsetX = startX - rect.left;
+        offsetY = startY - rect.top;
+        item.style.zIndex = 100;
+
+        const moveHandler = (ev) => {
+            const dx = ev.clientX - startX;
+            const dy = ev.clientY - startY;
+            if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+                dragged = true;
+                item.style.left = (ev.clientX - offsetX) + 'px';
+                item.style.top = (ev.clientY - offsetY) + 'px';
+
+                if (state.hasMachine) {
+                    const m = document.getElementById('machine-area');
+                    const mr = m.getBoundingClientRect();
+                    if (ev.clientX >= mr.left && ev.clientX <= mr.right &&
+                        ev.clientY >= mr.top && ev.clientY <= mr.bottom) {
+                        m.classList.add('drag-over');
+                    } else {
+                        m.classList.remove('drag-over');
+                    }
+                }
+            }
         };
 
-        function startGame() {
-            document.getElementById('main-menu').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('main-menu').style.display = 'none';
-                document.getElementById('game-ui').style.display = 'block';
-                updateUI();
-            }, 500);
-        }
+        const upHandler = (ev) => {
+            document.removeEventListener('mousemove', moveHandler);
+            document.removeEventListener('mouseup', upHandler);
+            item.style.zIndex = '';
 
-        function updateUI() {
-            document.getElementById('coin-count').innerText = state.coins;
-            document.getElementById('debt-count').innerText = state.debt;
-            
-            if (state.coins >= state.goal) {
-                if (!state.ticketsUnlocked) {
-                    state.ticketsUnlocked = true;
-                    state.goal = state.nextGoal;
-                    alert("Вы накопили 50 монет! Билеты разблокированы. Новая цель: 2000 монет.");
-                } else if (state.goal === 2000 && state.coins >= 2000) {
-                    state.goal = 5000;
-                    alert("Новая цель: 5000 монет!");
+            if (state.hasMachine) {
+                document.getElementById('machine-area').classList.remove('drag-over');
+                const m = document.getElementById('machine-area');
+                const mr = m.getBoundingClientRect();
+                if (dragged && ev.clientX >= mr.left && ev.clientX <= mr.right &&
+                    ev.clientY >= mr.top && ev.clientY <= mr.bottom &&
+                    type === 'ticket') {
+                    item.remove();
+                    runMachine();
+                    return;
                 }
             }
 
-            let progressPercent = Math.min((state.coins / state.goal) * 100, 100);
-            document.getElementById('progress-fill').style.width = progressPercent + '%';
-            document.getElementById('progress-text').innerText = `${state.coins} / ${state.goal}`;
-            document.getElementById('goal-target').innerText = state.goal;
-
-            const ticketBtn = document.getElementById('btn-buy-ticket');
-            const ticketReq = document.getElementById('ticket-req');
-            if (state.ticketsUnlocked) {
-                ticketBtn.classList.remove('disabled');
-                ticketReq.style.display = 'none';
-            } else {
-                ticketBtn.classList.add('disabled');
-                ticketReq.style.display = 'block';
-                ticketReq.innerText = `(Нужно ${state.goal} монет)`;
+            if (!dragged) {
+                focusItem(item, type);
             }
+        };
 
-            document.getElementById('lvl-luck').innerText = `Ур. ${state.levels.luck}`;
-            document.getElementById('lvl-scratch').innerText = `Ур. ${state.levels.scratchArea}`;
-            document.getElementById('lvl-coin').innerText = `Мощность ${state.levels.tinCoin + 1}`;
+        document.addEventListener('mousemove', moveHandler);
+        document.addEventListener('mouseup', upHandler);
+    };
+
+    container.appendChild(item);
+}
+
+// ============ МАШИНКА ============
+function buyMachine() {
+    if (state.hasMachine) return;
+    if (state.coins < 500) return showMsg('Нужно 500 монет!');
+    state.coins -= 500;
+    state.hasMachine = true;
+    playSfx(700, 0.2, 0.15);
+    document.getElementById('btn-machine').classList.add('disabled');
+    document.getElementById('btn-machine').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Машинка куплена</div></div>';
+    document.getElementById('machine-area').style.display = 'flex';
+    document.getElementById('upgrade-machineSpeed').style.display = 'flex';
+    updateUI();
+    saveGame();
+}
+
+let machineRunning = false;
+function runMachine() {
+    if (machineRunning) return showMsg('Машинка занята!');
+    machineRunning = true;
+    const slot = document.getElementById('machine-slot');
+    const progress = document.getElementById('machine-progress');
+    const fill = document.getElementById('machine-progress-fill');
+
+    slot.innerHTML = '🎟️';
+    progress.style.display = 'block';
+    fill.style.width = '0%';
+
+    const baseTime = 8000;
+    const speedMultiplier = 1 + state.levels.machineSpeed * 0.25;
+    const duration = baseTime / speedMultiplier;
+    const steps = 100;
+    const stepTime = duration / steps;
+    let current = 0;
+
+    const interval = setInterval(() => {
+        current += 1;
+        fill.style.width = (current / steps * 100) + '%';
+        if (current >= steps) {
+            clearInterval(interval);
+            finishMachine();
+        }
+    }, stepTime);
+}
+
+function finishMachine() {
+    machineRunning = false;
+    const slot = document.getElementById('machine-slot');
+    const progress = document.getElementById('machine-progress');
+    const fill = document.getElementById('machine-progress-fill');
+
+    const tier = state.currentTicketTier;
+    const t = state.ticketTiers[tier];
+    const reward = t.minReward + Math.floor(Math.random() * (t.maxReward - t.minReward + 1));
+
+    state.coins += reward;
+    playSfx(900, 0.3, 0.2);
+    setTimeout(() => playSfx(1200, 0.3, 0.15), 120);
+
+    const mRect = document.getElementById('machine-area').getBoundingClientRect();
+    showFloatReward('+' + reward, mRect.left + mRect.width/2, mRect.top);
+
+    slot.innerHTML = '✅';
+    progress.style.display = 'none';
+    fill.style.width = '0%';
+
+    setTimeout(() => { slot.innerHTML = '⌛'; }, 1500);
+    updateUI();
+    saveGame();
+}
+
+// ============ ФОКУС ============
+function focusItem(element, type) {
+    if (state.activeItem) return;
+    state.activeItem = type;
+    element.remove();
+
+    const container = document.getElementById('focus-item-container');
+    const infoPanel = document.getElementById('info-panel');
+    const infoTitle = document.getElementById('info-title');
+    const infoDesc = document.getElementById('info-desc');
+    const infoStats = document.getElementById('info-stats');
+    const collectBtn = document.getElementById('collect-btn');
+
+    // Показываем темный фон
+    document.getElementById('focus-backdrop').style.display = 'block';
+    document.getElementById('focus-area').style.display = 'flex';
+    infoPanel.style.display = 'flex';
+    collectBtn.style.display = 'none';
+    document.getElementById('clean-progress-fill').style.width = '0%';
+
+    container.innerHTML = '';
+    container.className = type === 'ticket' ? 'ticket' : '';
+
+    if (type === 'plate') {
+        container.style.width = '340px';
+        container.style.height = '340px';
+        container.style.borderRadius = '50%';
+        container.style.background = 'radial-gradient(circle at 40% 35%, #fff, #e0e0e0 60%, #b8b8b8)';
+
+        infoTitle.innerText = '🍽️ Повседневная работа';
+        infoDesc.innerText = 'Помой тарелку, чтобы получить монеты.';
+        infoStats.innerHTML = `<div class="stat-row"><span>Награда:</span><span>$ ${3 + state.levels.tinCoin}</span></div>`;
+
+        const canvas = document.createElement('canvas');
+        canvas.id = 'focus-canvas';
+        canvas.width = 340;
+        canvas.height = 340;
+        container.appendChild(canvas);
+
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#8B4513';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#A0522D';
+        for (let i = 0; i < 40; i++) {
+            ctx.beginPath();
+            ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*45+25, 0, Math.PI*2);
+            ctx.fill();
+        }
+        ctx.fillStyle = '#6B3410';
+        for (let i = 0; i < 15; i++) {
+            ctx.beginPath();
+            ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*20+5, 0, Math.PI*2);
+            ctx.fill();
+        }
+        setupScratching(canvas, ctx, 'plate');
+    } else {
+        container.style.width = '400px';
+        container.style.height = '220px';
+        container.style.borderRadius = '15px';
+        container.style.background = 'linear-gradient(135deg, #f39c12, #e67e22)';
+
+        const t = state.ticketTiers[state.currentTicketTier];
+
+        const result = [];
+        for (let i = 0; i < 3; i++) {
+            result.push(t.symbols[Math.floor(Math.random() * t.symbols.length)]);
         }
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
-            if (tab === 'items') {
-                document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
-                document.getElementById('tab-items').classList.remove('hidden');
-            } else {
-                document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
-                document.getElementById('tab-gadgets').classList.remove('hidden');
-            }
+        const counts = {};
+        result.forEach(s => counts[s] = (counts[s] || 0) + 1);
+        const maxCount = Math.max(...Object.values(counts));
+
+        let winAmount = 0;
+        let winText = '';
+        if (maxCount === 3) {
+            winAmount = t.maxReward;
+            winText = '🎉 ДЖЕКПОТ!';
+        } else if (maxCount === 2) {
+            winAmount = Math.floor((t.minReward + t.maxReward) / 2);
+            winText = '✨ Хорошо!';
+        } else {
+            winAmount = 0;
+            winText = '😢 Не повезло';
         }
+        state.currentTicketWin = winAmount;
+        state.currentTicketSymbols = result;
 
-        function buyPlate() {
-            if (state.coins < 1) return alert("Недостаточно монет!");
-            if (state.activeItem) return alert("Сначала закончи с текущим предметом!");
-            
-            state.coins -= 1;
-            updateUI();
-            spawnTableItem('plate');
+        infoTitle.innerText = `🎫 ${t.name} билет`;
+        infoDesc.innerText = 'Сотри защитный слой!';
+        infoStats.innerHTML = `
+            <div class="stat-row"><span>Символы:</span><span>${result.join(' ')}</span></div>
+            <div class="stat-row"><span>Результат:</span><span>${winText}</span></div>
+            <div class="stat-row"><span>Выигрыш:</span><span>$ ${winAmount}</span></div>
+        `;
+
+        const symbolsDiv = document.createElement('div');
+        symbolsDiv.className = 'ticket-symbols';
+        symbolsDiv.innerHTML = `<span>${result[0]}</span><span>${result[1]}</span><span>${result[2]}</span>`;
+        container.appendChild(symbolsDiv);
+
+        const canvas = document.createElement('canvas');
+        canvas.id = 'focus-canvas';
+        canvas.width = 400;
+        canvas.height = 220;
+        container.appendChild(canvas);
+
+        const ctx = canvas.getContext('2d');
+        const grad = ctx.createLinearGradient(0, 0, 400, 220);
+        grad.addColorStop(0, '#d0d0d0');
+        grad.addColorStop(0.5, '#a8a8a8');
+        grad.addColorStop(1, '#c0c0c0');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = '#8a8a8a';
+        for (let i = 0; i < 100; i++) {
+            ctx.beginPath();
+            ctx.moveTo(Math.random()*canvas.width, Math.random()*canvas.height);
+            ctx.lineTo(Math.random()*canvas.width, Math.random()*canvas.height);
+            ctx.stroke();
         }
+        setupScratching(canvas, ctx, 'ticket');
+    }
+}
 
-        function buyTicket() {
-            if (!state.ticketsUnlocked) return alert("Билеты еще не разблокированы!");
-            if (state.coins < 10) return alert("Недостаточно монет!");
-            if (state.activeItem) return alert("Сначала закончи с текущим предметом!");
+function setupScratching(canvas, ctx, type) {
+    const brushSize = 30 + (state.levels.scratchArea * 12);
+    const distanceNeeded = ((canvas.width * canvas.height) / (brushSize * 2)) * 0.7;
 
-            state.coins -= 10;
-            updateUI();
-            spawnTableItem('ticket');
+    let totalDistance = 0;
+    let lastX = null, lastY = null;
+    let isFinished = false;
+
+    state.isScratching = false;
+
+    canvas.onmousedown = (e) => {
+        state.isScratching = true;
+        lastX = null; lastY = null;
+    };
+    canvas.onmouseup = () => { state.isScratching = false; lastX = null; lastY = null; };
+    canvas.onmouseleave = () => { state.isScratching = false; lastX = null; lastY = null; };
+
+    canvas.onmousemove = (e) => {
+        if (!state.isScratching || isFinished) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, brushSize, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (lastX !== null && lastY !== null) {
+            const dx = x - lastX;
+            const dy = y - lastY;
+            totalDistance += Math.sqrt(dx*dx + dy*dy);
         }
+        lastX = x; lastY = y;
 
-        function spawnTableItem(type) {
-            const container = document.getElementById('table-items');
-            const item = document.createElement('div');
-            item.className = `table-item ${type}`;
-            item.innerText = type === 'plate' ? '🍽️' : '🎟️';
-            
-            const maxX = window.innerWidth - 400;
-            const maxY = window.innerHeight - 200;
-            const x = 250 + Math.random() * (maxX - 250);
-            const y = 100 + Math.random() * (maxY - 100);
-            
-            item.style.left = `${x}px`;
-            item.style.top = `${y}px`;
-            
-            item.onclick = () => focusItem(item, type);
-            container.appendChild(item);
+        let percent = Math.min(100, (totalDistance / distanceNeeded) * 100);
+        document.getElementById('clean-progress-fill').style.width = percent + '%';
+
+        if (totalDistance >= distanceNeeded) {
+            isFinished = true;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('clean-progress-fill').style.width = '100%';
+            playSfx(700, 0.2, 0.1);
+            finishScratching(type);
         }
+    };
+}
 
-        function focusItem(element, type) {
-            if (state.activeItem) return;
+function finishScratching(type) {
+    const canvas = document.getElementById('focus-canvas');
+    if (canvas) { canvas.onmousemove = null; canvas.onmousedown = null; canvas.onmouseup = null; }
 
-            state.activeItem = type;
-            element.remove();
+    let reward = 0;
+    if (type === 'plate') reward = 3 + state.levels.tinCoin;
+    else reward = state.currentTicketWin;
 
-            const focusArea = document.getElementById('focus-area');
-            const focusContainer = document.getElementById('focus-item-container');
-            const infoPanel = document.getElementById('info-panel');
-            const infoTitle = document.getElementById('info-title');
-            const infoDesc = document.getElementById('info-desc');
-            const infoStats = document.getElementById('info-stats');
-            const collectBtn = document.getElementById('collect-btn');
-            const cleanFill = document.getElementById('clean-progress-fill');
+    const collectBtn = document.getElementById('collect-btn');
+    collectBtn.innerText = `$ ${reward}`;
+    collectBtn.style.display = 'block';
+    collectBtn.dataset.reward = reward;
+    collectBtn.dataset.type = type;
+}
 
-            focusArea.style.display = 'flex';
-            infoPanel.style.display = 'flex';
-            collectBtn.style.display = 'none';
-            cleanFill.style.width = '0%';
+function collectReward() {
+    const collectBtn = document.getElementById('collect-btn');
+    const reward = parseInt(collectBtn.dataset.reward);
+    const type = collectBtn.dataset.type;
 
-            // Очищаем контейнер от старых элементов
-            focusContainer.innerHTML = '';
-            focusContainer.className = type;
+    state.coins += reward;
+    if (type === 'plate') state.platesWashed++;
 
-            if (type === 'plate') {
-                focusContainer.style.width = '300px';
-                focusContainer.style.height = '300px';
-                focusContainer.style.background = '#ecf0f1';
-                focusContainer.style.borderRadius = '50%';
+    playSfx(880, 0.15, 0.15);
 
-                infoTitle.innerText = "Повседневная работа";
-                infoDesc.innerText = "Помой тарелку, чтобы получить монеты.";
-                infoStats.innerHTML = `
-                    <div class="stat-row"><span>Награда:</span><span>$ ${3 + state.levels.tinCoin}</span></div>
-                `;
-                
-                const canvas = document.createElement('canvas');
-                canvas.id = 'focus-canvas';
-                canvas.width = 300;
-                canvas.height = 300;
-                focusContainer.appendChild(canvas);
+    const rect = collectBtn.getBoundingClientRect();
+    showFloatReward('+' + reward, rect.left + rect.width/2, rect.top);
 
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#8B4513';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#A0522D';
-                for(let i=0; i<30; i++) {
-                    ctx.beginPath();
-                    ctx.arc(Math.random()*canvas.width, Math.random()*canvas.height, Math.random()*40+20, 0, Math.PI*2);
-                    ctx.fill();
-                }
-                setupScratching(canvas, ctx, 'plate');
-            } 
-            else if (type === 'ticket') {
-                focusContainer.style.width = '240px';
-                focusContainer.style.height = '400px';
-                focusContainer.style.background = '#27ae60'; // Зеленый фон билета
-                focusContainer.style.borderRadius = '15px';
+    updateUI();
+    closeFocus();
+    saveGame();
+}
 
-                // Генерируем случайные символы
-                const symbolsList = ['🔥', '💵', '💰'];
-                let result = [];
-                for(let i=0; i<3; i++) {
-                    result.push(symbolsList[Math.floor(Math.random() * symbolsList.length)]);
-                }
-                
-                // Считаем выигрыш
-                let counts = {};
-                result.forEach(s => counts[s] = (counts[s] || 0) + 1);
-                let maxCount = Math.max(...Object.values(counts));
-                
-                let winAmount = 0;
-                if (maxCount === 3) winAmount = 143;
-                else if (maxCount === 2) winAmount = 71;
-                else winAmount = 0;
+function closeFocus() {
+    state.activeItem = null;
+    state.isScratching = false;
+    document.getElementById('focus-backdrop').style.display = 'none';
+    document.getElementById('focus-area').style.display = 'none';
+    document.getElementById('info-panel').style.display = 'none';
+    document.getElementById('collect-btn').style.display = 'none';
+    document.getElementById('clean-progress-fill').style.width = '0%';
+    document.getElementById('focus-item-container').innerHTML = '';
+}
 
-                state.currentTicketWin = winAmount;
-                state.currentTicketResult = result;
+// ============ УЛУЧШЕНИЯ ============
+function buyUpgrade(type) {
+    if (type === 'stickyMat') {
+        if (state.hasStickyMat) return;
+        if (state.coins < 50) return showMsg('Нужно 50 монет!');
+        state.coins -= 50;
+        state.hasStickyMat = true;
+        document.getElementById('slot-sticky-mat').style.display = 'flex';
+        document.getElementById('slot-sticky-mat').classList.add('active');
+        document.getElementById('btn-sticky-mat').classList.add('disabled');
+        document.getElementById('btn-sticky-mat').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Куплено</div></div>';
+        updateUI();
+        saveGame();
+        return;
+    }
+    if (type === 'trashCan') {
+        if (state.hasTrashCan) return;
+        if (state.coins < 5) return showMsg('Нужно 5 монет!');
+        state.coins -= 5;
+        state.hasTrashCan = true;
+        document.getElementById('slot-trash-can').style.display = 'flex';
+        document.getElementById('slot-trash-can').classList.add('active');
+        document.getElementById('btn-trash-can').classList.add('disabled');
+        document.getElementById('btn-trash-can').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Куплено</div></div>';
+        updateUI();
+        saveGame();
+        return;
+    }
 
-                infoTitle.innerText = "Выигрывают 2";
-                infoDesc.innerText = "Чтобы ВЫИГРАТЬ, 2 символа должны совпасть";
-                infoStats.innerHTML = `
-                    <div class="stat-row"><span>Шанс символа</span></div>
-                    <div class="stat-row"><span>🔥 50 %</span><span>$ 29</span></div>
-                    <div class="stat-row"><span>💵 40 %</span><span>$ 71</span></div>
-                    <div class="stat-row"><span>💰 10 %</span><span>$ 143</span></div>
-                `;
+    const price = state.prices[type];
+    if (state.coins < price) return showMsg(`Нужно ${price} монет!`);
 
-                // Создаем блок с символами (под краской)
-                const symbolsDiv = document.createElement('div');
-                symbolsDiv.className = 'ticket-symbols';
-                symbolsDiv.innerHTML = `<span>${result[0]}</span><span>${result[1]}</span><span>${result[2]}</span>`;
-                focusContainer.appendChild(symbolsDiv);
+    state.coins -= price;
+    state.levels[type]++;
+    state.prices[type] = Math.floor(price * 1.6);
+    playSfx(650, 0.2, 0.15);
+    updateUI();
+    saveGame();
+}
 
-                // Создаем canvas для стирания (поверх символов)
-                const canvas = document.createElement('canvas');
-                canvas.id = 'focus-canvas';
-                canvas.width = 240;
-                canvas.height = 400;
-                focusContainer.appendChild(canvas);
+// ============ ТЕЛЕФОН ============
+function openPhone() { document.getElementById('modal').style.display = 'flex'; }
+function closePhone() { document.getElementById('modal').style.display = 'none'; }
+function takeLoan() {
+    state.coins += 100;
+    state.debt += 150;
+    updateUI();
+    closePhone();
+    showMsg('Кредит взят! +100 монет. Долг: 150');
+    saveGame();
+}
+function getHint() {
+    if (state.coins < 5) return showMsg('Нужно 5 монет!');
+    state.coins -= 5;
+    updateUI();
+    closePhone();
+    const hints = [
+        'Стирай билеты до конца, чтобы получить монеты!',
+        'Купи машинку — она чистит билеты сама.',
+        'Улучшай Удачу, чтобы выигрывать чаще!',
+        'Не бери слишком много кредитов.',
+        'Прокачивай площадь стёрки — чистить легче.'
+    ];
+    showMsg(hints[Math.floor(Math.random() * hints.length)]);
+    saveGame();
+}
 
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#bdc3c7'; // Серебряный слой
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.strokeStyle = '#95a5a6';
-                for(let i=0; i<80; i++) {
-                    ctx.beginPath();
-                    ctx.moveTo(Math.random()*canvas.width, Math.random()*canvas.height);
-                    ctx.lineTo(Math.random()*canvas.width, Math.random()*canvas.height);
-                    ctx.stroke();
-                }
-                setupScratching(canvas, ctx, 'ticket');
-            }
-        }
+// ============ УТИЛИТЫ ============
+function showMsg(text) { alert(text); }
 
-        function setupScratching(canvas, ctx, type) {
-            const brushSize = 25 + (state.levels.scratchArea * 10);
-            
-            // Рассчитываем необходимую дистанцию для 50% очистки
-            const distanceNeeded = ((canvas.width * canvas.height) / (brushSize * 2)) * 0.8;
-            
-            let totalDistance = 0;
-            let lastX = null;
-            let lastY = null;
-            let isFinished = false;
+function showFloatReward(text, x, y) {
+    const el = document.createElement('div');
+    el.className = 'float-reward';
+    el.innerText = text;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1500);
+}
 
-            state.isScratching = false;
+setInterval(() => {
+    if (document.getElementById('game-ui').style.display === 'block') {
+        updatePriceColor('price-luck', state.prices.luck);
+        updatePriceColor('price-scratch', state.prices.scratchArea);
+        updatePriceColor('price-tinCoin', state.prices.tinCoin);
+        updatePriceColor('price-machineSpeed', state.prices.machineSpeed);
+    }
+}, 500);
 
-            canvas.onmousedown = (e) => { 
-                state.isScratching = true; 
-                lastX = null; 
-                lastY = null;
-            };
-            canvas.onmouseup = () => { 
-                state.isScratching = false;
-                lastX = null; 
-                lastY = null;
-            };
-            canvas.onmouseleave = () => { 
-                state.isScratching = false;
-                lastX = null; 
-                lastY = null;
-            };
-
-            canvas.onmousemove = (e) => {
-                if (!state.isScratching || isFinished) return;
-                
-                const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.beginPath();
-                ctx.arc(x, y, brushSize, 0, Math.PI * 2);
-                ctx.fill();
-
-                if (lastX !== null && lastY !== null) {
-                    const dx = x - lastX;
-                    const dy = y - lastY;
-                    totalDistance += Math.sqrt(dx*dx + dy*dy);
-                }
-                lastX = x;
-                lastY = y;
-                
-                let percent = Math.min(100, (totalDistance / distanceNeeded) * 100);
-                document.getElementById('clean-progress-fill').style.width = percent + '%';
-                
-                if (totalDistance >= distanceNeeded) {
-                    isFinished = true;
-                    ctx.clearRect(0, 0, canvas.width, canvas.height); // Мгновенная очистка
-                    document.getElementById('clean-progress-fill').style.width = '100%';
-                    finishScratching(type);
-                }
-            };
-        }
-
-        function finishScratching(type) {
-            const canvas = document.getElementById('focus-canvas');
-            canvas.onmousemove = null;
-            canvas.onmousedown = null;
-            canvas.onmouseup = null;
-
-            let reward = 0;
-            if (type === 'plate') {
-                reward = 3 + state.levels.tinCoin;
-            } else if (type === 'ticket') {
-                reward = state.currentTicketWin; // Берем заранее рассчитанный выигрыш
-            }
-
-            const collectBtn = document.getElementById('collect-btn');
-            collectBtn.innerText = `$ ${reward}`;
-            collectBtn.style.display = 'block';
-            collectBtn.dataset.reward = reward;
-            collectBtn.dataset.type = type;
-        }
-
-        function collectReward() {
-            const collectBtn = document.getElementById('collect-btn');
-            const reward = parseInt(collectBtn.dataset.reward);
-            const type = collectBtn.dataset.type;
-
-            state.coins += reward;
-            
-            if (type === 'plate') {
-                state.platesWashed++;
-            }
-
-            updateUI();
-            closeFocus();
-        }
-
-        function closeFocus() {
-            state.activeItem = null;
-            state.isScratching = false;
-            
-            document.getElementById('focus-area').style.display = 'none';
-            document.getElementById('info-panel').style.display = 'none';
-            document.getElementById('collect-btn').style.display = 'none';
-            document.getElementById('clean-progress-fill').style.width = '0%';
-            
-            // Очищаем контейнер
-            document.getElementById('focus-item-container').innerHTML = '';
-        }
-
-        function buyUpgrade(type) {
-            if (type === 'stickyMat') {
-                if (state.hasStickyMat) return;
-                if (state.coins < 50) return alert("Нужно 50 монет!");
-                state.coins -= 50;
-                state.hasStickyMat = true;
-                document.getElementById('slot-sticky-mat').classList.remove('hidden');
-                document.getElementById('slot-sticky-mat').classList.add('active');
-                document.getElementById('btn-sticky-mat').classList.add('disabled');
-                document.getElementById('btn-sticky-mat').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Куплено</div></div>';
-                updateUI();
-                return;
-            }
-            
-            if (type === 'trashCan') {
-                if (state.hasTrashCan) return;
-                if (state.coins < 5) return alert("Нужно 5 монет!");
-                state.coins -= 5;
-                state.hasTrashCan = true;
-                document.getElementById('slot-trash-can').classList.remove('hidden');
-                document.getElementById('slot-trash-can').classList.add('active');
-                document.getElementById('btn-trash-can').classList.add('disabled');
-                document.getElementById('btn-trash-can').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Куплено</div></div>';
-                updateUI();
-                return;
-            }
-
-            const price = state.prices[type];
-            if (state.coins < price) return alert(`Нужно ${price} монет!`);
-            
-            state.coins -= price;
-            state.levels[type]++;
-            state.prices[type] = Math.floor(price * 1.5);
-            
-            if (type === 'luck') document.querySelectorAll('.upgrade-price')[0].innerText = `$ ${state.prices.luck}`;
-            if (type === 'scratchArea') document.querySelectorAll('.upgrade-price')[1].innerText = `$ ${state.prices.scratchArea}`;
-            if (type === 'tinCoin') document.querySelectorAll('.upgrade-price')[2].innerText = `$ ${state.prices.tinCoin}`;
-
-            updateUI();
-        }
-
-        function openPhone() { document.getElementById('modal').style.display = 'flex'; }
-        function closePhone() { document.getElementById('modal').style.display = 'none'; }
-        function takeLoan() {
-            state.coins += 100;
-            state.debt += 150;
-            updateUI();
-            closePhone();
-            alert("Вы взяли кредит! +100 монет. Долг: 150");
-        }
-        function getHint() {
-            if (state.coins < 5) return alert("Нужно 5 монет для подсказки!");
-            state.coins -= 5;
-            updateUI();
-            closePhone();
-            const hints = [
-                "Совет: Зажми ЛКМ и води мышкой туда-сюда, чтобы стереть грязь.",
-                "Совет: Улучшение 'Площадь стёрки' ускоряет процесс.",
-                "Совет: Не берите слишком много кредитов, долг растет!",
-                "Совет: Удача увеличивает выигрыш в лотерее."
-            ];
-            alert(hints[Math.floor(Math.random() * hints.length)]);
-        }
-    </script>
+// ============ ЗАГРУЗКА ============
+loadGame();
+</script>
 </body>
 </html>
