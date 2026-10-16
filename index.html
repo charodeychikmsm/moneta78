@@ -114,13 +114,6 @@ h1.title {
     cursor: pointer;
     border: 2px solid #fff;
 }
-.volume-slider::-moz-range-thumb {
-    width: 22px; height: 22px;
-    background: #1abc9c;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid #fff;
-}
 
 #game-ui {
     display: none;
@@ -219,9 +212,7 @@ header {
     justify-content: center;
     align-items: center;
     gap: 15px;
-    animation: fadeIn 0.2s ease-out;
 }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 #pause-menu h2 {
     color: var(--text-gold);
     font-size: 2rem;
@@ -283,10 +274,16 @@ header {
     padding: 12px;
     cursor: pointer;
     transition: all 0.15s;
+    position: relative;
 }
 .shop-item:hover { border-color: var(--text-gold); transform: translateX(3px); }
-.shop-item.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; filter: grayscale(0.7); }
-.shop-item.unlocked { border-color: #2ecc71; }
+.shop-item.locked { opacity: 0.45; }
+.shop-item.locked::before {
+    content: '🔒';
+    position: absolute;
+    top: 8px; right: 8px;
+    font-size: 1rem;
+}
 
 .item-icon { font-size: 1.9rem; margin-right: 14px; }
 .item-info { display: flex; flex-direction: column; gap: 4px; }
@@ -388,7 +385,6 @@ header {
     width: 55%; height: 55%;
     border-radius: 50%;
     background: radial-gradient(circle at 40% 40%, #ffffff, #e8e8e8 60%, #b8b8b8);
-    box-shadow: inset 2px 2px 6px rgba(0,0,0,0.1);
 }
 
 .table-item.ticket {
@@ -397,20 +393,7 @@ header {
     background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
     border: 2px solid #b35d00;
     box-shadow: inset 0 0 0 3px rgba(255,255,255,0.3);
-    position: relative;
-    overflow: hidden;
 }
-.table-item.ticket::before,
-.table-item.ticket::after {
-    content: '';
-    position: absolute;
-    width: 20px; height: 20px;
-    background: #8B5A2B;
-    border-radius: 50%;
-    top: 50%;
-}
-.table-item.ticket::before { left: -12px; transform: translateY(-50%); }
-.table-item.ticket::after { right: -12px; transform: translateY(-50%); }
 
 @keyframes dropIn {
     0% { transform: translateY(-200px) scale(0.5) rotate(-15deg); opacity: 0; }
@@ -424,7 +407,6 @@ header {
     backdrop-filter: blur(3px);
     z-index: 50;
     display: none;
-    animation: fadeIn 0.2s ease-out;
 }
 
 #focus-area {
@@ -455,7 +437,6 @@ header {
     border-radius: 50%;
     background: radial-gradient(circle at 40% 40%, #ffffff, #e8e8e8 60%, #b8b8b8);
     pointer-events: none;
-    box-shadow: inset 2px 2px 8px rgba(0,0,0,0.08);
 }
 #focus-item-container.ticket {
     width: 400px; height: 220px;
@@ -478,8 +459,59 @@ header {
     position: absolute;
     inset: 0;
     width: 100%; height: 100%;
-    cursor: crosshair;
+    cursor: none;
     z-index: 1;
+}
+
+/* КУРСОРЫ */
+#coin-cursor, #sponge-cursor {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1000;
+    display: none;
+    transition: transform 0.08s ease-out;
+    filter: drop-shadow(2px 3px 4px rgba(0,0,0,0.5));
+}
+#coin-cursor.pressed, #sponge-cursor.pressed { transform: scale(0.82); }
+
+#coin-cursor .coin-inner {
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 35% 30%, #ffe680, #f1c40f 45%, #d35400 95%);
+    border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.25), inset 3px 3px 0 rgba(255,255,255,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    color: #8B4513;
+    font-family: 'Press Start 2P', cursive;
+}
+
+#sponge-cursor .sponge-inner {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f39c12 0%, #d35400 50%, #e67e22 100%);
+    border-radius: 15px;
+    border: 3px solid #7a4000;
+    box-shadow: inset -3px -3px 0 rgba(0,0,0,0.3), inset 3px 3px 0 rgba(255,255,255,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2rem;
+    position: relative;
+    overflow: hidden;
+}
+#sponge-cursor .sponge-inner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+        radial-gradient(circle, rgba(255,255,255,0.3) 1px, transparent 1px),
+        radial-gradient(circle, rgba(0,0,0,0.15) 2px, transparent 2px);
+    background-size: 8px 8px, 12px 12px;
+    background-position: 0 0, 4px 4px;
 }
 
 #info-panel {
@@ -510,12 +542,6 @@ header {
     width: 0%; height: 100%;
     background: linear-gradient(90deg, #16a085, #1abc9c, #16a085);
     transition: width 0.1s;
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-}
-@keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
 }
 
 #collect-btn {
@@ -529,7 +555,7 @@ header {
     font-size: 1.3rem;
     cursor: pointer;
     box-shadow: 0 6px 0 #d35400;
-    transition: transform 0.1s, box-shadow 0.1s;
+    transition: transform 0.1s;
     animation: pulse 1.5s infinite;
 }
 #collect-btn:active { transform: translateY(6px); box-shadow: 0 0 0 #d35400; }
@@ -551,45 +577,28 @@ header {
     justify-content: center;
     align-items: center;
     z-index: 8;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 0 20px rgba(26,188,156,0.2);
-    transition: border-color 0.2s, transform 0.2s;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
 }
 #machine-area.drag-over { border-color: #f1c40f; transform: scale(1.05); }
-.machine-label {
-    font-size: 0.65rem;
-    color: #1abc9c;
-    position: absolute;
-    top: -22px;
-    text-align: center;
-    width: 100%;
-}
+.machine-label { font-size: 0.65rem; color: #1abc9c; position: absolute; top: -22px; width: 100%; text-align: center; }
 .machine-slot {
     width: 120px; height: 70px;
     background: rgba(0,0,0,0.4);
     border: 3px dashed #1abc9c;
     border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 2rem;
-    color: #1abc9c;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 2rem; color: #1abc9c;
 }
 .machine-progress {
     width: 120px; height: 12px;
     background: #1a252f;
     border: 2px solid #1abc9c;
     border-radius: 4px;
-    margin-top: 8px;
-    overflow: hidden;
+    margin-top: 8px; overflow: hidden;
     display: none;
 }
-.machine-progress-fill {
-    width: 0%; height: 100%;
-    background: #1abc9c;
-    transition: width 0.3s linear;
-}
+.machine-progress-fill { width: 0%; height: 100%; background: #1abc9c; transition: width 0.3s linear; }
 
-/* Мусорка */
 #trash-area {
     position: absolute;
     bottom: 30px;
@@ -603,22 +612,11 @@ header {
     justify-content: center;
     align-items: center;
     z-index: 8;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 0 20px rgba(231,76,60,0.2);
-    transition: border-color 0.2s, transform 0.2s;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
 }
 #trash-area.drag-over { border-color: #f1c40f; transform: scale(1.1); }
-.trash-label {
-    font-size: 0.6rem;
-    color: #e74c3c;
-    position: absolute;
-    top: -22px;
-    text-align: center;
-    width: 100%;
-}
-.trash-icon {
-    font-size: 3rem;
-    color: #e74c3c;
-}
+.trash-label { font-size: 0.6rem; color: #e74c3c; position: absolute; top: -22px; width: 100%; text-align: center; }
+.trash-icon { font-size: 3rem; color: #e74c3c; }
 
 #inventory-area {
     position: absolute;
@@ -634,13 +632,9 @@ header {
     background: rgba(0,0,0,0.5);
     border: 3px dashed #7f8c8d;
     border-radius: 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 0.6rem;
-    text-align: center;
-    color: #bdc3c7;
-    padding: 5px;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 0.6rem; text-align: center;
+    color: #bdc3c7; padding: 5px;
 }
 .inventory-slot.active { border-color: #1abc9c; background: rgba(26,188,156,0.2); color: #fff; }
 
@@ -669,11 +663,9 @@ header {
     font-family: inherit;
     font-size: 0.75rem;
     border-radius: 6px;
-    transition: background 0.2s;
 }
 .modal-btn:hover { background: #4a6274; }
 .modal-btn.danger { background: var(--text-red); }
-.modal-btn.danger:hover { background: #c0392b; }
 
 .float-reward {
     position: absolute;
@@ -713,15 +705,13 @@ header {
     border: 4px solid #16a085;
     font-size: 1rem;
     z-index: 200;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
     transition: transform 0.3s, opacity 0.3s;
     opacity: 0;
     pointer-events: none;
+    max-width: 500px;
+    text-align: center;
 }
-#toast.show {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-}
+#toast.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 </style>
 </head>
 <body>
@@ -778,7 +768,7 @@ header {
         </div>
 
         <div id="tab-items" class="tab-content">
-            <div class="shop-item" id="btn-buy-plate" onclick="buyPlate()">
+            <div class="shop-item" onclick="buyPlate()">
                 <div class="item-icon">🍽️</div>
                 <div class="item-info">
                     <div class="item-name">Грязная тарелка</div>
@@ -786,7 +776,7 @@ header {
                 </div>
             </div>
 
-            <div class="shop-item disabled" id="btn-buy-ticket-0" onclick="buyTicket(0)">
+            <div class="shop-item locked" id="btn-ticket-0" onclick="buyTicket(0)">
                 <div class="item-icon">🎟️</div>
                 <div class="item-info">
                     <div class="item-name">Мелкий билет</div>
@@ -795,7 +785,7 @@ header {
                 </div>
             </div>
 
-            <div class="shop-item disabled" id="btn-buy-ticket-1" onclick="buyTicket(1)">
+            <div class="shop-item locked" id="btn-ticket-1" onclick="buyTicket(1)">
                 <div class="item-icon">🎫</div>
                 <div class="item-info">
                     <div class="item-name">Средний билет</div>
@@ -804,7 +794,7 @@ header {
                 </div>
             </div>
 
-            <div class="shop-item disabled" id="btn-buy-ticket-2" onclick="buyTicket(2)">
+            <div class="shop-item locked" id="btn-ticket-2" onclick="buyTicket(2)">
                 <div class="item-icon">🏆</div>
                 <div class="item-info">
                     <div class="item-name">Крупный билет</div>
@@ -938,12 +928,20 @@ header {
     <button class="modal-btn danger" onclick="closePhone()">Закрыть</button>
 </div>
 
+<!-- КУРСОРЫ -->
+<div id="coin-cursor">
+    <div class="coin-inner">$</div>
+</div>
+<div id="sponge-cursor">
+    <div class="sponge-inner"></div>
+</div>
+
 <div id="toast"></div>
 
 <script>
 const defaultState = {
     coins: 1,
-    maxCoinsReached: 1,  // НОВОЕ: максимальный достигнутый баланс
+    maxCoinsReached: 1,
     debt: 0,
     platesWashed: 0,
     hasStickyMat: false,
@@ -974,7 +972,7 @@ const SAVE_KEY = 'moneta78_save';
 
 function saveGame() {
     try {
-        const saveData = {
+        localStorage.setItem(SAVE_KEY, JSON.stringify({
             coins: state.coins,
             maxCoinsReached: state.maxCoinsReached,
             debt: state.debt,
@@ -988,11 +986,10 @@ function saveGame() {
             levels: state.levels,
             prices: state.prices,
             goal: state.goal
-        };
-        localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+        }));
         showSaveIndicator();
         return true;
-    } catch(e) { console.warn('Save failed', e); return false; }
+    } catch(e) { return false; }
 }
 
 function loadGame() {
@@ -1001,7 +998,6 @@ function loadGame() {
         if (!raw) return false;
         const data = JSON.parse(raw);
         Object.assign(state, data);
-        // Fallback для старых сохранений
         if (!state.maxCoinsReached) state.maxCoinsReached = state.coins;
         return true;
     } catch(e) { return false; }
@@ -1026,25 +1022,22 @@ function showToast(text) {
     const t = document.getElementById('toast');
     t.innerText = text;
     t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 1500);
+    setTimeout(() => t.classList.remove('show'), 1800);
 }
 
 setInterval(() => {
-    if (document.getElementById('game-ui').style.display === 'block' && !isPaused) {
-        saveGame();
-    }
+    if (document.getElementById('game-ui').style.display === 'block' && !isPaused) saveGame();
 }, 5000);
 
 window.addEventListener('beforeunload', saveGame);
 
-// ============ МУЗЫКА ============
+// ============ АУДИО ============
 let audioCtx = null;
 let musicLoop = null;
 
 function initAudio() {
     if (!audioCtx) {
-        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-        catch(e) { console.warn('Audio not supported'); }
+        try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
     }
 }
 
@@ -1134,7 +1127,7 @@ function startGame() {
 function applyLoadedState() {
     if (state.hasMachine) {
         document.getElementById('machine-area').style.display = 'flex';
-        document.getElementById('btn-machine').classList.add('disabled');
+        document.getElementById('btn-machine').classList.add('locked');
         document.getElementById('btn-machine').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Машинка куплена</div></div>';
         document.getElementById('upgrade-machineSpeed').style.display = 'flex';
     }
@@ -1142,13 +1135,13 @@ function applyLoadedState() {
         document.getElementById('trash-area').style.display = 'flex';
         document.getElementById('slot-trash-can').style.display = 'flex';
         document.getElementById('slot-trash-can').classList.add('active');
-        document.getElementById('btn-trash-can').classList.add('disabled');
+        document.getElementById('btn-trash-can').classList.add('locked');
         document.getElementById('btn-trash-can').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Куплено</div></div>';
     }
     if (state.hasStickyMat) {
         document.getElementById('slot-sticky-mat').style.display = 'flex';
         document.getElementById('slot-sticky-mat').classList.add('active');
-        document.getElementById('btn-sticky-mat').classList.add('disabled');
+        document.getElementById('btn-sticky-mat').classList.add('locked');
         document.getElementById('btn-sticky-mat').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Куплено</div></div>';
     }
 }
@@ -1180,19 +1173,19 @@ function exitToMenu() {
     closeFocus();
 }
 
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' || e.keyCode === 27) {
-        if (document.getElementById('game-ui').style.display === 'block') {
-            if (state.activeItem) { closeFocus(); return; }
-            if (document.getElementById('modal').style.display === 'flex') { closePhone(); return; }
-            togglePause();
-        }
+window.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' || e.key === 'Esc' || e.keyCode === 27) {
+        const guiVisible = document.getElementById('game-ui').style.display === 'block';
+        if (!guiVisible) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (state.activeItem) { closeFocus(); return; }
+        if (document.getElementById('modal').style.display === 'flex') { closePhone(); return; }
+        togglePause();
     }
-});
+}, true);
 
-// ============ UI ============
 function updateUI() {
-    // Обновляем максимальный баланс
     if (state.coins > state.maxCoinsReached) {
         state.maxCoinsReached = state.coins;
     }
@@ -1211,17 +1204,14 @@ function updateUI() {
         setTimeout(() => playSfx(1200, 0.3, 0.2), 150);
     }
 
-    // Разблокировка билетов по МАКСИМАЛЬНОМУ балансу
     state.ticketTiers.forEach((tier, i) => {
-        const btn = document.getElementById('btn-buy-ticket-' + i);
+        const btn = document.getElementById('btn-ticket-' + i);
         const req = document.getElementById('ticket-req-' + i);
         if (state.maxCoinsReached >= tier.unlockGoal) {
-            btn.classList.remove('disabled');
-            btn.classList.add('unlocked');
+            btn.classList.remove('locked');
             if (req) req.style.display = 'none';
         } else {
-            btn.classList.add('disabled');
-            btn.classList.remove('unlocked');
+            btn.classList.add('locked');
             if (req) req.style.display = 'block';
         }
     });
@@ -1266,7 +1256,6 @@ function switchTab(tab) {
     }
 }
 
-// ============ ПОКУПКИ ============
 function buyPlate() {
     if (state.coins < 1) return showToast('Мало монет!');
     if (state.activeItem) return showToast('Сначала закончи с текущим!');
@@ -1278,15 +1267,22 @@ function buyPlate() {
 
 function buyTicket(tier) {
     const t = state.ticketTiers[tier];
-    if (state.maxCoinsReached < t.unlockGoal) return showToast('Билет ещё не разблокирован!');
-    if (state.coins < t.cost) return showToast('Мало монет!');
-    if (state.activeItem) return showToast('Сначала закончи с текущим!');
+    if (state.maxCoinsReached < t.unlockGoal) {
+        return showToast(`🔒 Билет откроется при балансе ${t.unlockGoal} монет!`);
+    }
+    if (state.coins < t.cost) {
+        return showToast(`Мало монет! Нужно ${t.cost} 💰`);
+    }
+    if (state.activeItem) {
+        return showToast('Сначала закончи с текущим!');
+    }
 
     state.coins -= t.cost;
     state.currentTicketTier = tier;
     playSfx(550, 0.1, 0.1);
     updateUI();
     spawnTableItem('ticket');
+    saveGame();
 }
 
 function spawnTableItem(type) {
@@ -1324,27 +1320,21 @@ function spawnTableItem(type) {
                 item.style.left = (ev.clientX - offsetX) + 'px';
                 item.style.top = (ev.clientY - offsetY) + 'px';
 
-                // Подсветка машинки
                 if (state.hasMachine && type === 'ticket') {
                     const m = document.getElementById('machine-area');
                     const mr = m.getBoundingClientRect();
                     if (ev.clientX >= mr.left && ev.clientX <= mr.right &&
                         ev.clientY >= mr.top && ev.clientY <= mr.bottom) {
                         m.classList.add('drag-over');
-                    } else {
-                        m.classList.remove('drag-over');
-                    }
+                    } else m.classList.remove('drag-over');
                 }
-                // Подсветка мусорки
                 if (state.hasTrashCan) {
                     const t = document.getElementById('trash-area');
                     const tr = t.getBoundingClientRect();
                     if (ev.clientX >= tr.left && ev.clientX <= tr.right &&
                         ev.clientY >= tr.top && ev.clientY <= tr.bottom) {
                         t.classList.add('drag-over');
-                    } else {
-                        t.classList.remove('drag-over');
-                    }
+                    } else t.classList.remove('drag-over');
                 }
             }
         };
@@ -1354,7 +1344,6 @@ function spawnTableItem(type) {
             document.removeEventListener('mouseup', upHandler);
             item.style.zIndex = '';
 
-            // Проверка машинки
             if (state.hasMachine && type === 'ticket') {
                 const m = document.getElementById('machine-area');
                 m.classList.remove('drag-over');
@@ -1366,7 +1355,6 @@ function spawnTableItem(type) {
                     return;
                 }
             }
-            // Проверка мусорки
             if (state.hasTrashCan) {
                 const t = document.getElementById('trash-area');
                 t.classList.remove('drag-over');
@@ -1380,9 +1368,7 @@ function spawnTableItem(type) {
                 }
             }
 
-            if (!dragged) {
-                focusItem(item, type);
-            }
+            if (!dragged) focusItem(item, type);
         };
 
         document.addEventListener('mousemove', moveHandler);
@@ -1392,14 +1378,13 @@ function spawnTableItem(type) {
     container.appendChild(item);
 }
 
-// ============ МАШИНКА ============
 function buyMachine() {
     if (state.hasMachine) return;
     if (state.coins < 500) return showToast('Нужно 500 монет!');
     state.coins -= 500;
     state.hasMachine = true;
     playSfx(700, 0.2, 0.15);
-    document.getElementById('btn-machine').classList.add('disabled');
+    document.getElementById('btn-machine').classList.add('locked');
     document.getElementById('btn-machine').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Машинка куплена</div></div>';
     document.getElementById('machine-area').style.display = 'flex';
     document.getElementById('upgrade-machineSpeed').style.display = 'flex';
@@ -1464,6 +1449,9 @@ function finishMachine() {
 }
 
 // ============ ФОКУС ============
+let coinCursor = document.getElementById('coin-cursor');
+let spongeCursor = document.getElementById('sponge-cursor');
+
 function focusItem(element, type) {
     if (state.activeItem) return;
     state.activeItem = type;
@@ -1492,7 +1480,7 @@ function focusItem(element, type) {
         container.style.background = 'radial-gradient(circle at 40% 35%, #fff, #e0e0e0 60%, #b8b8b8)';
 
         infoTitle.innerText = '🍽️ Повседневная работа';
-        infoDesc.innerText = 'Помой тарелку, чтобы получить монеты.';
+        infoDesc.innerText = 'Помой тарелку ГУБКОЙ, чтобы получить деньги.';
         infoStats.innerHTML = `<div class="stat-row"><span>Награда:</span><span>$ ${3 + state.levels.tinCoin}</span></div>`;
 
         const canvas = document.createElement('canvas');
@@ -1550,7 +1538,7 @@ function focusItem(element, type) {
         state.currentTicketSymbols = result;
 
         infoTitle.innerText = `🎫 ${t.name} билет`;
-        infoDesc.innerText = 'Сотри защитный слой!';
+        infoDesc.innerText = 'Сотри МОНЕТОЙ защитный слой!';
         infoStats.innerHTML = `
             <div class="stat-row"><span>Символы:</span><span>${result.join(' ')}</span></div>
             <div class="stat-row"><span>Результат:</span><span>${winText}</span></div>
@@ -1587,7 +1575,10 @@ function focusItem(element, type) {
 }
 
 function setupScratching(canvas, ctx, type) {
-    const brushSize = 30 + (state.levels.scratchArea * 12);
+    // Для тарелки — губка, для билета — монета
+    const isPlate = (type === 'plate');
+    const toolSize = isPlate ? (60 + state.levels.scratchArea * 15) : (55 + state.levels.scratchArea * 15);
+    const brushSize = toolSize / 2;
     const distanceNeeded = ((canvas.width * canvas.height) / (brushSize * 2)) * 0.7;
 
     let totalDistance = 0;
@@ -1596,16 +1587,45 @@ function setupScratching(canvas, ctx, type) {
 
     state.isScratching = false;
 
+    const activeCursor = isPlate ? spongeCursor : coinCursor;
+    const inactiveCursor = isPlate ? coinCursor : spongeCursor;
+
+    // Прячем неактивный курсор
+    inactiveCursor.style.display = 'none';
+
+    canvas.onmouseenter = () => {
+        activeCursor.style.display = 'block';
+        activeCursor.style.width = toolSize + 'px';
+        activeCursor.style.height = toolSize + 'px';
+        if (!isPlate) {
+            activeCursor.querySelector('.coin-inner').style.fontSize = Math.max(0.8, toolSize / 45) + 'rem';
+        }
+    };
+    canvas.onmouseleave = () => {
+        activeCursor.style.display = 'none';
+        activeCursor.classList.remove('pressed');
+        state.isScratching = false;
+        lastX = null; lastY = null;
+    };
+
     canvas.onmousedown = (e) => {
         if (isPaused) return;
         state.isScratching = true;
+        activeCursor.classList.add('pressed');
         lastX = null; lastY = null;
     };
-    canvas.onmouseup = () => { state.isScratching = false; lastX = null; lastY = null; };
-    canvas.onmouseleave = () => { state.isScratching = false; lastX = null; lastY = null; };
+    canvas.onmouseup = () => {
+        state.isScratching = false;
+        activeCursor.classList.remove('pressed');
+        lastX = null; lastY = null;
+    };
 
     canvas.onmousemove = (e) => {
+        activeCursor.style.left = (e.clientX - toolSize/2) + 'px';
+        activeCursor.style.top = (e.clientY - toolSize/2) + 'px';
+
         if (!state.isScratching || isFinished || isPaused) return;
+
         const rect = canvas.getBoundingClientRect();
         const x = (e.clientX - rect.left) * (canvas.width / rect.width);
         const y = (e.clientY - rect.top) * (canvas.height / rect.height);
@@ -1637,7 +1657,11 @@ function setupScratching(canvas, ctx, type) {
 
 function finishScratching(type) {
     const canvas = document.getElementById('focus-canvas');
-    if (canvas) { canvas.onmousemove = null; canvas.onmousedown = null; canvas.onmouseup = null; }
+    if (canvas) { canvas.onmousemove = null; canvas.onmousedown = null; canvas.onmouseup = null; canvas.onmouseenter = null; canvas.onmouseleave = null; }
+    coinCursor.style.display = 'none';
+    spongeCursor.style.display = 'none';
+    coinCursor.classList.remove('pressed');
+    spongeCursor.classList.remove('pressed');
 
     let reward = 0;
     if (type === 'plate') reward = 3 + state.levels.tinCoin;
@@ -1677,9 +1701,12 @@ function closeFocus() {
     document.getElementById('collect-btn').style.display = 'none';
     document.getElementById('clean-progress-fill').style.width = '0%';
     document.getElementById('focus-item-container').innerHTML = '';
+    coinCursor.style.display = 'none';
+    spongeCursor.style.display = 'none';
+    coinCursor.classList.remove('pressed');
+    spongeCursor.classList.remove('pressed');
 }
 
-// ============ УЛУЧШЕНИЯ ============
 function buyUpgrade(type) {
     if (type === 'stickyMat') {
         if (state.hasStickyMat) return;
@@ -1688,7 +1715,7 @@ function buyUpgrade(type) {
         state.hasStickyMat = true;
         document.getElementById('slot-sticky-mat').style.display = 'flex';
         document.getElementById('slot-sticky-mat').classList.add('active');
-        document.getElementById('btn-sticky-mat').classList.add('disabled');
+        document.getElementById('btn-sticky-mat').classList.add('locked');
         document.getElementById('btn-sticky-mat').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Куплено</div></div>';
         updateUI();
         saveGame();
@@ -1702,7 +1729,7 @@ function buyUpgrade(type) {
         document.getElementById('trash-area').style.display = 'flex';
         document.getElementById('slot-trash-can').style.display = 'flex';
         document.getElementById('slot-trash-can').classList.add('active');
-        document.getElementById('btn-trash-can').classList.add('disabled');
+        document.getElementById('btn-trash-can').classList.add('locked');
         document.getElementById('btn-trash-can').innerHTML = '<div class="item-icon">✅</div><div class="item-info"><div class="item-name">Куплено</div></div>';
         updateUI();
         saveGame();
@@ -1720,7 +1747,6 @@ function buyUpgrade(type) {
     saveGame();
 }
 
-// ============ ТЕЛЕФОН ============
 function openPhone() {
     if (isPaused) return;
     document.getElementById('modal').style.display = 'flex';
@@ -1740,13 +1766,13 @@ function getHint() {
     updateUI();
     closePhone();
     const hints = [
-        'Стирай билеты до конца, чтобы получить монеты!',
+        'Тарелку мой губкой, а билет стирай монетой!',
         'Купи машинку — она чистит билеты сама.',
         'Улучшай Удачу, чтобы выигрывать чаще!',
         'Не бери слишком много кредитов.',
-        'Прокачивай площадь стёрки — чистить легче.',
+        'Прокачивай площадь стёрки — инструмент станет больше.',
         'Нажми ESC, чтобы сохранить игру и выйти в меню.',
-        'Тарелку можно выбросить в мусорку — просто перетащи её туда.'
+        'Ненужные предметы можно выбросить в мусорку.'
     ];
     showToast(hints[Math.floor(Math.random() * hints.length)]);
     saveGame();
